@@ -35,7 +35,7 @@ connectButton.addEventListener('click', async function() {
 	const engine = new Engine(document.getElementById('main-canvas'));
 	window.engine = engine;
 	
-	engine.addObject(new Ant('o<w>o', new Vec2(70, 200), 0));
+	engine.addObject(new Ant(face, new Vec2(70, 200), 0));
 	
 	engine.start();
 });
