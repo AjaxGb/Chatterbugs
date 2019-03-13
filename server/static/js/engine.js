@@ -32,7 +32,29 @@ export default class Engine {
 		};
 		this.keyStates = {};
 		
-		this._keyHandler = (e) => {
+		const preventKeys = {
+			'ArrowDown': {},
+			'ArrowLeft': {},
+			'ArrowUp': {},
+			'ArrowRight': {},
+			'KeyW': {},
+			'KeyA': {},
+			'KeyS': {},
+			'KeyD': {},
+		};
+		
+		const keyHandler = (e) => {
+			const tagName = e.target.tagName;
+			if (tagName === 'INPUT' || tagName === 'TEXTBOX') {
+				return;
+			}
+			
+			if (preventKeys[e.code]) {
+				// TODO: Finer control, if needed
+				e.preventDefault();
+				e.stopPropagation();
+			}
+			
 			if (e.type === 'keydown') {
 				if (this.keyStates[e.code] === true) return;
 				this.keyStates[e.code] = true;
@@ -62,6 +84,8 @@ export default class Engine {
 				delete this.keyCallbacks[action][e.code];
 			}
 		};
+		window.addEventListener('keydown', keyHandler);
+		window.addEventListener('keyup',   keyHandler);
 	}
 	
 	get width() {
@@ -93,9 +117,6 @@ export default class Engine {
 			}
 			this.needStart = null;
 		}
-		
-		window.addEventListener('keydown', this._keyHandler);
-		window.addEventListener('keyup',   this._keyHandler);
 	}
 	
 	pause() {
@@ -106,9 +127,6 @@ export default class Engine {
 		
 		this.state = Engine.STATE_PAUSED;
 		cancelAnimationFrame(this.nextRenderID);
-		
-		window.removeEventListener('keydown', this._keyHandler);
-		window.removeEventListener('keyup',   this._keyHandler);
 	}
 	
 	loadImages(urls, prefix='', suffix='') {

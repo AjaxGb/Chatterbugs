@@ -48,7 +48,7 @@ async function runGame() {
 			}
 			case Packets.S_RemovePlayer: {
 				if (p.face === playerFace) {
-					throw new Error('Told to despawn self?');
+					console.error('Told to despawn self?');
 				} else {
 					engine.getNetObj('ant', p.face).isDead = true;
 				}
