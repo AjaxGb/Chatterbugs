@@ -5,10 +5,11 @@ from websockets.exceptions import ConnectionClosed
 class WSClient:
 	all_clients = {}
 	
-	def __init__(self, ws, face, x, y):
+	def __init__(self, ws, face, x, y, rot):
 		self.face = face
 		self.ws = ws
 		self.pos = (x, y)
+		self.rot = rot
 	
 	async def __aenter__(self):
 		if WSClient.all_clients.setdefault(self.face, self) != self:
@@ -59,14 +60,16 @@ class WSClient:
 		
 		# Notify all other clients of self
 		WSClient.broadcast(
-			packets.S_AddPlayer(face=self.face, pos=self.pos),
+			packets.S_AddPlayer(
+				face=self.face, pos=self.pos, rot=self.rot),
 			ignore=self)
 		self.log('Notified others')
 		
 		# Notify self of all clients (including self)
 		for client in WSClient.all_clients.values():
 			await self.send(
-				packets.S_AddPlayer(face=client.face, pos=client.pos))
+				packets.S_AddPlayer(
+					face=client.face, pos=client.pos, rot=client.rot))
 		self.log('Notified self')
 		
 		while True:
@@ -74,8 +77,10 @@ class WSClient:
 			
 			if p.ptype == packets.C_MoveToPos:
 				self.pos = tuple(p.pos)
+				self.rot = p.rot
 				WSClient.broadcast(
-					packets.S_MovePlayer(face=self.face, pos=self.pos),
+					packets.S_MovePlayer(
+						face=self.face, pos=self.pos, rot=self.rot),
 					ignore=self)
 			else:
 				self.log('UNEXPECTED PACKET:', p)

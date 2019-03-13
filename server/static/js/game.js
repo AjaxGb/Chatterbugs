@@ -40,24 +40,24 @@ async function runGame() {
 		
 		switch (p._type) {
 			case Packets.S_AddPlayer: {
-				if (p.face === playerFace) {
-					engine.addObject(new PlayerAnt(p.face, new Vec2(...p.pos), 0));
-				} else {
-					engine.addObject(new RemoteAnt(p.face, new Vec2(...p.pos), 0));
-				}
+				const type = (p.face === playerFace)
+					? PlayerAnt
+					: RemoteAnt;
+				engine.addObject(new type(p.face, new Vec2(...p.pos), p.rot));
 				break;
 			}
 			case Packets.S_RemovePlayer: {
 				if (p.face === playerFace) {
 					throw new Error('Told to despawn self?');
 				} else {
-					engine.byNetID.get(`Ant::${p.face}`).isDead = true;
+					engine.getNetObj('ant', p.face).isDead = true;
 				}
 				break;
 			}
 			case Packets.S_MovePlayer: {
-				const ant = engine.byNetID.get(`Ant::${p.face}`);
+				const ant = engine.getNetObj('ant', p.face);
 				ant.pos = new Vec2(...p.pos);
+				ant.rot = p.rot;
 				break;
 			}
 			default: {

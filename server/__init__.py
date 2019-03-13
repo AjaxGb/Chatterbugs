@@ -18,5 +18,5 @@ async def client_connect(request, ws):
 	
 	print('Receive connection:', face)
 	
-	async with WSClient(ws, face, 10, 10) as client:
+	async with WSClient(ws, face, 100, 100, 0) as client:
 		await client.run()

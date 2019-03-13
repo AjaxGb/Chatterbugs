@@ -7,7 +7,8 @@ export class Ant {
 		this.pos = pos;
 		this.rot = rot;
 		
-		this.netID = `Ant::${face}`;
+		this.netCategory = 'ant';
+		this.netID = face;
 		
 		this.segments = [0.3, 0.4, -0.2];
 		
@@ -68,6 +69,7 @@ export class PlayerAnt extends Ant {
 		if (engine.frame % 10 === 0) {
 			engine.socket.send(Packets.C_MoveToPos.unparse({
 				pos: this.pos,
+				rot: this.rot,
 			}));
 		}
 	}

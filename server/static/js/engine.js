@@ -9,7 +9,9 @@ export default class Engine {
 		
 		this.images = {};
 		
-		this.byNetID = new Map();
+		this.byNetID = {
+			ant: new Map(),
+		};
 		this.objects = [];
 		this.bgFill = null;
 		
@@ -141,8 +143,14 @@ export default class Engine {
 	
 	addObject(obj) {
 		this.objects.push(obj);
-		if (obj.netID) this.byNetID.set(obj.netID, obj);
+		if (obj.netCategory && obj.netID) {
+			const map = this.byNetID[obj.netCategory].set(obj.netID, obj);
+		}
 		return obj;
+	}
+	
+	getNetObj(category, id) {
+		return this.byNetID[category].get(id);
 	}
 	
 	onRender(realMillis) {
@@ -183,8 +191,8 @@ export default class Engine {
 		
 		removeWhere(this.objects, o => {
 			if (o.isDead) {
-				if (o.netID) {
-					this.byNetID.delete(o.netID);
+				if (o.netCategory && o.netID) {
+					this.byNetID[o.netCategory].delete(o.netID);
 				}
 				return true;
 			}
