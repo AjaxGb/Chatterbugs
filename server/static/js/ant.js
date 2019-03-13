@@ -52,21 +52,35 @@ export class Ant {
 }
 
 export class PlayerAnt extends Ant {
-	onUpdate(dt, engine) {
+	constructor(face, pos, rot=0) {
+		super(face, pos, rot);
 		
+		this.secsSinceNet = 0;
+		this.netDirty = false;
+	}
+	
+	onUpdate(dt, engine) {
 		if (engine.keyStates.KeyA || engine.keyStates.ArrowLeft) {
 			this.rot -= this.angSpeed;
+			this.netDirty = true;
 		}
 		if (engine.keyStates.KeyD || engine.keyStates.ArrowRight) {
 			this.rot += this.angSpeed;
+			this.netDirty = true;
 		}
 		
 		if (engine.keyStates.KeyW || engine.keyStates.ArrowUp) {
 			const movement = Vec2.fromAngle(this.rot + Math.PI / 2, this.speed * dt);
 			this.pos = Vec2.add(this.pos, movement);
+			this.netDirty = true;
 		}
 		
-		if (engine.frame % 10 === 0) {
+		this.secsSinceNet += dt;
+		if (this.secsSinceNet > 0.05 && this.netDirty) {
+			
+			this.secsSinceNet = 0;
+			this.netDirty = false;
+			
 			engine.socket.send(Packets.C_MoveToPos.unparse({
 				pos: this.pos,
 				rot: this.rot,

@@ -7,12 +7,16 @@ export default class Engine {
 		this.ctx = canvas.getContext('2d');
 		this.socket = socket;
 		
+		this.state = Engine.STATE_UNSTARTED;
+		
 		this.images = {};
 		
 		this.byNetID = {
 			ant: new Map(),
 		};
 		this.objects = [];
+		this.needStart = [];
+		
 		this.bgFill = null;
 		
 		this.onRender = this.onRender.bind(this);
@@ -27,29 +31,8 @@ export default class Engine {
 			up:    {},
 		};
 		this.keyStates = {};
-	}
-	
-	get width() {
-		return this.canvas.width;
-	}
-	
-	get height() {
-		return this.canvas.height;
-	}
-	
-	get aabb() {
-		return [0, 0, this.width, this.height];
-	}
-	
-	start() {
-		this.nextRenderID = requestAnimationFrame(
-			(ms) => {
-				// Set the initial millis first time around
-				this._realMillis = ms;
-				this.onRender(ms);
-			});
 		
-		const keyHandler = (e) => {
+		this._keyHandler = (e) => {
 			if (e.type === 'keydown') {
 				if (this.keyStates[e.code] === true) return;
 				this.keyStates[e.code] = true;
@@ -79,9 +62,53 @@ export default class Engine {
 				delete this.keyCallbacks[action][e.code];
 			}
 		};
+	}
+	
+	get width() {
+		return this.canvas.width;
+	}
+	
+	get height() {
+		return this.canvas.height;
+	}
+	
+	get aabb() {
+		return [0, 0, this.width, this.height];
+	}
+	
+	start() {
+		if (this.state === Engine.STATE_STARTED) return;
 		
-		window.addEventListener('keydown', keyHandler);
-		window.addEventListener('keyup', keyHandler);
+		this.state = Engine.STATE_STARTED;
+		this.nextRenderID = requestAnimationFrame(
+			(ms) => {
+				// Set the initial millis first time around
+				this._realMillis = ms;
+				this.onRender(ms);
+			});
+		
+		if (this.needStart) {
+			for (let obj of this.needStart) {
+				obj.onStart(this);
+			}
+			this.needStart = null;
+		}
+		
+		window.addEventListener('keydown', this._keyHandler);
+		window.addEventListener('keyup',   this._keyHandler);
+	}
+	
+	pause() {
+		if (this.state === Engine.STATE_UNSTARTED) {
+			throw new Error('Game has not been started yet');
+		}
+		if (this.state === Engine.STATE_PAUSED) return;
+		
+		this.state = Engine.STATE_PAUSED;
+		cancelAnimationFrame(this.nextRenderID);
+		
+		window.removeEventListener('keydown', this._keyHandler);
+		window.removeEventListener('keyup',   this._keyHandler);
 	}
 	
 	loadImages(urls, prefix='', suffix='') {
@@ -146,6 +173,15 @@ export default class Engine {
 		if (obj.netCategory && obj.netID) {
 			const map = this.byNetID[obj.netCategory].set(obj.netID, obj);
 		}
+		
+		if (obj.onStart) {
+			if (this.state === Engine.STATE_UNSTARTED) {
+				this.needStart.push(obj);
+			} else {
+				obj.onStart(this);
+			}
+		}
+		
 		return obj;
 	}
 	
@@ -205,5 +241,8 @@ export default class Engine {
 			}
 		}
 	}
-	
 }
+
+Engine.STATE_UNSTARTED = 0;
+Engine.STATE_STARTED   = 1;
+Engine.STATE_PAUSED    = 2;
