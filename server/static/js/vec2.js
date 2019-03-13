@@ -120,6 +120,10 @@ export default class Vec2 {
 		return `Vec2(${this.x}, ${this.y})`;
 	}
 	
+	toJSON() {
+		return [this.x, this.y];
+	}
+	
 	*[Symbol.iterator]() {
 		yield this.x;
 		yield this.y;

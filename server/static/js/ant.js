@@ -1,30 +1,18 @@
 import Vec2 from './vec2.js';
+import Packets from './packets-json.js';
 
-export default class Ant {
+export class Ant {
 	constructor(face, pos, rot=0) {
 		this.face = face;
 		this.pos = pos;
 		this.rot = rot;
 		
+		this.netID = `Ant::${face}`;
+		
 		this.segments = [0.3, 0.4, -0.2];
 		
 		this.speed = 100;
 		this.angSpeed = 0.05;
-	}
-	
-	onUpdate(dt, engine) {
-		
-		if (engine.keyStates.KeyA || engine.keyStates.ArrowLeft) {
-			this.rot -= this.angSpeed;
-		}
-		if (engine.keyStates.KeyD || engine.keyStates.ArrowRight) {
-			this.rot += this.angSpeed;
-		}
-		
-		if (engine.keyStates.KeyW || engine.keyStates.ArrowUp) {
-			const movement = Vec2.fromAngle(this.rot + Math.PI / 2, this.speed * dt);
-			this.pos = Vec2.add(this.pos, movement);
-		}
 	}
 	
 	onRender(ctx, dt, engine) {
@@ -60,4 +48,31 @@ export default class Ant {
 		
 		ctx.restore();
 	}
+}
+
+export class PlayerAnt extends Ant {
+	onUpdate(dt, engine) {
+		
+		if (engine.keyStates.KeyA || engine.keyStates.ArrowLeft) {
+			this.rot -= this.angSpeed;
+		}
+		if (engine.keyStates.KeyD || engine.keyStates.ArrowRight) {
+			this.rot += this.angSpeed;
+		}
+		
+		if (engine.keyStates.KeyW || engine.keyStates.ArrowUp) {
+			const movement = Vec2.fromAngle(this.rot + Math.PI / 2, this.speed * dt);
+			this.pos = Vec2.add(this.pos, movement);
+		}
+		
+		if (engine.frame % 10 === 0) {
+			engine.socket.send(Packets.C_MoveToPos.unparse({
+				pos: this.pos,
+			}));
+		}
+	}
+}
+
+export class RemoteAnt extends Ant {
+	
 }

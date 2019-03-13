@@ -16,5 +16,7 @@ app.static('/', './static/html/index.html')
 async def client_connect(request, ws):
 	face = await ws.recv()
 	
-	async with WSClient(ws, face) as client:
+	print('Receive connection:', face)
+	
+	async with WSClient(ws, face, 10, 10) as client:
 		await client.run()

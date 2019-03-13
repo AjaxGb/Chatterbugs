@@ -1,13 +1,14 @@
 import asyncio
-import server.packets as packets
+import server.packets_json as packets
 from websockets.exceptions import ConnectionClosed
 
 class WSClient:
 	all_clients = {}
 	
-	def __init__(self, ws, face):
+	def __init__(self, ws, face, x, y):
 		self.face = face
 		self.ws = ws
+		self.pos = (x, y)
 	
 	async def __aenter__(self):
 		if WSClient.all_clients.setdefault(self.face, self) != self:
@@ -18,6 +19,8 @@ class WSClient:
 	
 	async def __aexit__(self, err_type, err, tb):
 		del WSClient.all_clients[self.face]
+		WSClient.broadcast(
+			packets.S_RemovePlayer(face=self.face))
 		
 		if self.ws.open:
 			print('Client exited without closing socket!')
@@ -31,11 +34,16 @@ class WSClient:
 	
 	@classmethod
 	def broadcast(cls, packet, ignore=None):
-		data = packet.pack()
 		for client in cls.all_clients.values():
 			if client == ignore:
 				continue
-			asyncio.create_task(client.ws.send(data))
+			asyncio.create_task(client.ws.send(packet))
+	
+	async def send(self, packet):
+		return await self.ws.send(packet)
+	
+	async def recv(self):
+		return packets.unpack(self, await self.ws.recv())
 	
 	def close(self, reason):
 		print('close')
@@ -43,18 +51,31 @@ class WSClient:
 		self.ws.close(reason=reason)
 		self._closed()
 	
+	def log(self, *args):
+		print(f'[{self.face}]', *args)
+	
 	async def run(self):
-		sp = packets.S_SpawnPlayer(None, self.face, 10, 10)
-		WSClient.broadcast(sp)
+		self.log('Start running')
+		
+		# Notify all other clients of self
+		WSClient.broadcast(
+			packets.S_AddPlayer(face=self.face, pos=self.pos),
+			ignore=self)
+		self.log('Notified others')
+		
+		# Notify self of all clients (including self)
+		for client in WSClient.all_clients.values():
+			await self.send(
+				packets.S_AddPlayer(face=client.face, pos=client.pos))
+		self.log('Notified self')
 		
 		while True:
-			try:
-				data = await self.ws.recv()
-				p = packets.unpack(data)
-			except Exception:
-				print("Invalid packet received")
-				break
+			p = await self.recv()
 			
-			if type(p) == packets.R_MoveToPos:
-				r = packets.S_MovePlayer(None, p.face, p.x, p.y)
-				WSClient.broadcast(r)
+			if p.ptype == packets.C_MoveToPos:
+				self.pos = tuple(p.pos)
+				WSClient.broadcast(
+					packets.S_MovePlayer(face=self.face, pos=self.pos),
+					ignore=self)
+			else:
+				self.log('UNEXPECTED PACKET:', p)

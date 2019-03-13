@@ -2,12 +2,14 @@ import { removeWhere } from './utils.js';
 
 export default class Engine {
 	
-	constructor(canvas) {
+	constructor(canvas, socket) {
 		this.canvas = canvas;
 		this.ctx = canvas.getContext('2d');
+		this.socket = socket;
 		
 		this.images = {};
 		
+		this.byNetID = new Map();
 		this.objects = [];
 		this.bgFill = null;
 		
@@ -139,6 +141,7 @@ export default class Engine {
 	
 	addObject(obj) {
 		this.objects.push(obj);
+		if (obj.netID) this.byNetID.set(obj.netID, obj);
 		return obj;
 	}
 	
@@ -173,12 +176,20 @@ export default class Engine {
 		}
 		
 		for (let obj of this.objects) {
-			if (!obj.disabled && obj.onUpdate) {
+			if (!obj.disabled && !obj.isDead && obj.onUpdate) {
 				obj.onUpdate(this.delta, this);
 			}
 		}
 		
-		removeWhere(this.objects, o => o.isDead);
+		removeWhere(this.objects, o => {
+			if (o.isDead) {
+				if (o.netID) {
+					this.byNetID.delete(o.netID);
+				}
+				return true;
+			}
+			return false;
+		});
 		
 		for (let obj of this.objects) {
 			if (!obj.disabled && obj.onRender) {

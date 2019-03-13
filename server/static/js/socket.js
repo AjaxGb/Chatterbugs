@@ -99,7 +99,7 @@ export default class Socket {
 		}
 	}
 	
-	recv(filter=null) {
+	recv({wait=true, filter=null} = {}) {
 		// TODO: Abort
 		
 		if (this._recvQueue.length > 0) {
@@ -118,8 +118,12 @@ export default class Socket {
 			return Promise.reject(new Error('Already closed'));
 		}
 		
-		return new Promise((resolve, reject) => {
-			this._onMess.push({resolve, reject, filter});
-		});
+		if (wait) {
+			return new Promise((resolve, reject) => {
+				this._onMess.push({resolve, reject, filter});
+			});
+		} else {
+			return Promise.resolve(null);
+		}
 	}
 }

@@ -1,8 +1,9 @@
 import Engine from './engine.js';
 import Vec2 from './vec2.js';
-import Ant from './ant.js';
+import { PlayerAnt, RemoteAnt } from './ant.js';
 import Socket from './socket.js';
 import { waitMillis } from './utils.js';
+import Packets from './packets-json.js';
 
 const faceInput = document.getElementById('face-input');
 const connectButton = document.getElementById('connect');
@@ -10,14 +11,15 @@ const connectButton = document.getElementById('connect');
 const wsConnectUrl = new URL('connect', location);
 wsConnectUrl.protocol = 'ws:';
 
-const textEncoder = new TextEncoder('utf-8');
-const textDecoder = new TextDecoder('utf-8');
+connectButton.addEventListener('click', runGame);
 
-connectButton.addEventListener('click', async function() {
+async function runGame() {
+	const playerFace = faceInput.value;
+	connectButton.removeEventListener('click', runGame);
+	connectButton.disabled = true;
+	faceInput.disabled = true;
 	
-	const face = faceInput.value;
-	
-	if (face.length !== 5) {
+	if (playerFace.length !== 5) {
 		alert('Face must be 5 characters long!');
 		return;
 	}
@@ -25,17 +27,42 @@ connectButton.addEventListener('click', async function() {
 	const socket = new Socket(wsConnectUrl);
 	window.socket = socket;
 	
-	await socket.send(textEncoder.encode(face));
-	const spawnMess = await socket.recv(m => {
-		console.log(m);
-		const data = new DataView(m.data);
-		return data.getUint8(0) === 100;
-	});
+	await socket.send(playerFace);
 	
-	const engine = new Engine(document.getElementById('main-canvas'));
+	const engine = new Engine(document.getElementById('main-canvas'), socket);
 	window.engine = engine;
 	
-	engine.addObject(new Ant('o<w>o', new Vec2(70, 200), 0));
-	
 	engine.start();
-});
+	
+	while (true) {
+		const mess = await socket.recv();
+		const p = Packets.parse(mess.data);
+		
+		switch (p._type) {
+			case Packets.S_AddPlayer: {
+				if (p.face === playerFace) {
+					engine.addObject(new PlayerAnt(p.face, new Vec2(...p.pos), 0));
+				} else {
+					engine.addObject(new RemoteAnt(p.face, new Vec2(...p.pos), 0));
+				}
+				break;
+			}
+			case Packets.S_RemovePlayer: {
+				if (p.face === playerFace) {
+					throw new Error('Told to despawn self?');
+				} else {
+					engine.byNetID.get(`Ant::${p.face}`).isDead = true;
+				}
+				break;
+			}
+			case Packets.S_MovePlayer: {
+				const ant = engine.byNetID.get(`Ant::${p.face}`);
+				ant.pos = new Vec2(...p.pos);
+				break;
+			}
+			default: {
+				console.error('Unexpected packet received!', p, mess);
+			}
+		}
+	}
+}
