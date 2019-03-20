@@ -30,10 +30,10 @@ export default class Packets {
 };
 
 for (let name of [
-	'S_AddPlayer',    // face, pos, rot
-	'S_RemovePlayer', // face
-	'S_MovePlayer',   // face, pos, rot
-	'C_MoveToPos',    // pos
+	'S_OpenWorld',
+	'S_UpdateWorld',
+	'S_CloseWorld',
+	'C_UpdateSelf',
 ]) {
 	Packets[name] = new PacketType(name);
 }

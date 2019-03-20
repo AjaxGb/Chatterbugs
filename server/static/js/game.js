@@ -29,35 +29,65 @@ async function runGame() {
 	
 	await socket.send(playerFace);
 	
-	const engine = new Engine(document.getElementById('main-canvas'), socket);
-	window.engine = engine;
-	
+	const engine = window.engine = new Engine(
+		document.getElementById('main-canvas'), socket);
 	engine.start();
+	
+	function spawnEntity(id, data) {
+		let cls = undefined;
+		switch (data.type) {
+			case 'ant': {
+				if (id === playerFace) {
+					cls = PlayerAnt;
+				} else {
+					cls = RemoteAnt;
+				}
+				break;
+			}
+		}
+		
+		if (cls === undefined) {
+			console.error('Unknown entity type', data.type);
+		} else {
+			engine.addObject(new cls(id, data));
+		}
+	}
 	
 	while (true) {
 		const mess = await socket.recv();
 		const p = Packets.parse(mess.data);
 		
 		switch (p._type) {
-			case Packets.S_AddPlayer: {
-				const type = (p.face === playerFace)
-					? PlayerAnt
-					: RemoteAnt;
-				engine.addObject(new type(p.face, new Vec2(...p.pos), p.rot));
-				break;
-			}
-			case Packets.S_RemovePlayer: {
-				if (p.face === playerFace) {
-					console.error('Told to despawn self?');
-				} else {
-					engine.getNetObj('ant', p.face).isDead = true;
+			case Packets.S_OpenWorld: {
+				engine.killAllObjects();
+				
+				for (let id in p.entities) {
+					spawnEntity(id, p.entities[id]);
 				}
 				break;
 			}
-			case Packets.S_MovePlayer: {
-				const ant = engine.getNetObj('ant', p.face);
-				ant.pos = new Vec2(...p.pos);
-				ant.rot = p.rot;
+			case Packets.S_UpdateWorld: {
+				for (let obj of engine.objects) {
+					if (!obj.netID) continue;
+					
+					const diff = p.entities[obj.netID];
+					if (!diff) {
+						obj.isDead = true;
+						continue;
+					}
+					
+					delete p.entities[obj.netID];
+					obj.loadDiff(diff);
+				}
+				
+				for (let id in p.entities) {
+					spawnEntity(id, p.entities[id]);
+				}
+				
+				break;
+			}
+			case Packets.S_CloseWorld: {
+				engine.killAllObjects();
 				break;
 			}
 			default: {

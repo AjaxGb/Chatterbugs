@@ -203,6 +203,12 @@ export default class Engine {
 		return obj;
 	}
 	
+	killAllObjects(obj) {
+		for (let obj of this.objects) {
+			obj.isDead = true;
+		}
+	}
+	
 	getNetObj(category, id) {
 		return this.byNetID[category].get(id);
 	}

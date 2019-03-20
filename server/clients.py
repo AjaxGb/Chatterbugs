@@ -1,44 +1,16 @@
 import asyncio
 import server.packets_json as packets
-from websockets.exceptions import ConnectionClosed
+from server.entity import Point
 
 class WSClient:
-	all_clients = {}
-	
-	def __init__(self, ws, face, x, y, rot):
+	def __init__(self, ws, face):
 		self.face = face
 		self.ws = ws
-		self.pos = (x, y)
-		self.rot = rot
+		self.world = None
+		self.entity = None
 	
-	async def __aenter__(self):
-		if WSClient.all_clients.setdefault(self.face, self) != self:
-			await self.ws.close(reason='Face already in use')
-			raise KeyError('Face already in use')
-		
-		return self
-	
-	async def __aexit__(self, err_type, err, tb):
-		del WSClient.all_clients[self.face]
-		WSClient.broadcast(
-			packets.S_RemovePlayer(face=self.face))
-		
-		if self.ws.open:
-			print('Client exited without closing socket!')
-		
-		if err_type == asyncio.CancelledError:
-			print('Cancelled internally')
-			return True
-		if err_type == ConnectionClosed:
-			print('Closed abnormally:', err.code, err.reason)
-			return True
-	
-	@classmethod
-	def broadcast(cls, packet, ignore=None):
-		for client in cls.all_clients.values():
-			if client == ignore:
-				continue
-			asyncio.create_task(client.ws.send(packet))
+	def __hash__(self):
+		return hash(self.face)
 	
 	async def send(self, packet):
 		return await self.ws.send(packet)
@@ -58,29 +30,13 @@ class WSClient:
 	async def run(self):
 		self.log('Start running')
 		
-		# Notify all other clients of self
-		WSClient.broadcast(
-			packets.S_AddPlayer(
-				face=self.face, pos=self.pos, rot=self.rot),
-			ignore=self)
-		self.log('Notified others')
-		
-		# Notify self of all clients (including self)
-		for client in WSClient.all_clients.values():
-			await self.send(
-				packets.S_AddPlayer(
-					face=client.face, pos=client.pos, rot=client.rot))
-		self.log('Notified self')
-		
 		while True:
 			p = await self.recv()
 			
-			if p.ptype == packets.C_MoveToPos:
-				self.pos = tuple(p.pos)
-				self.rot = p.rot
-				WSClient.broadcast(
-					packets.S_MovePlayer(
-						face=self.face, pos=self.pos, rot=self.rot),
-					ignore=self)
+			if p.ptype == packets.C_UpdateSelf:
+				if hasattr(p, 'pos'):
+					self.entity.pos = Point(*p.pos)
+				if hasattr(p, 'rot'):
+					self.entity.rot = p.rot
 			else:
 				self.log('UNEXPECTED PACKET:', p)

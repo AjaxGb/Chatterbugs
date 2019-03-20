@@ -4,9 +4,10 @@ from sanic import Sanic
 from server.clients import WSClient
 from server.world import ChatterUniverse, ChatterWorld
 
-universe = ChatterUniverse()
-
 app = Sanic()
+
+universe = ChatterUniverse()
+app.add_task(universe.run())
 
 os.chdir(os.path.dirname(__file__))
 app.static('/js', './static/js', content_type='application/javascript')
@@ -18,5 +19,9 @@ async def client_connect(request, ws):
 	
 	print('Receive connection:', face)
 	
-	async with WSClient(ws, face, 100, 100, 0) as client:
+	client = WSClient(ws, face)
+	async with universe.add_client(client):
 		await client.run()
+	
+	if client.ws.open:
+		print('Client exited without closing socket!')

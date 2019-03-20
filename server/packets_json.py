@@ -25,10 +25,10 @@ def unpack(client, data):
 types = {}
 
 for name in [
-	'S_AddPlayer',    # face, pos
-	'S_RemovePlayer', # face
-	'S_MovePlayer',   # face, pos
-	'C_MoveToPos',    # pos
+	'S_OpenWorld',
+	'S_CloseWorld',
+	'S_UpdateWorld',
+	'C_UpdateSelf',
 	]:
 	packet = PacketType(name)
 	types[name] = packet

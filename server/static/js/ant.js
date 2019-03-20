@@ -2,7 +2,7 @@ import Vec2 from './vec2.js';
 import Packets from './packets-json.js';
 
 export class Ant {
-	constructor(face, pos, rot=0) {
+	constructor(face, {pos, rot=0}) {
 		this.face = face;
 		this.pos = pos;
 		this.rot = rot;
@@ -14,6 +14,11 @@ export class Ant {
 		
 		this.speed = 100;
 		this.angSpeed = 0.05;
+	}
+	
+	loadDiff({pos, rot}) {
+		if (pos != null) this.pos = new Vec2(...pos);
+		if (rot != null) this.rot = rot;
 	}
 	
 	onRender(ctx, dt, engine) {
@@ -52,12 +57,14 @@ export class Ant {
 }
 
 export class PlayerAnt extends Ant {
-	constructor(face, pos, rot=0) {
-		super(face, pos, rot);
+	constructor(face, {...data}) {
+		super(face, data);
 		
 		this.secsSinceNet = 0;
 		this.netDirty = false;
 	}
+	
+	// TODO: loadDiff that ignores small changes
 	
 	onUpdate(dt, engine) {
 		if (engine.keyStates.KeyA || engine.keyStates.ArrowLeft) {
@@ -81,7 +88,7 @@ export class PlayerAnt extends Ant {
 			this.secsSinceNet = 0;
 			this.netDirty = false;
 			
-			engine.socket.send(Packets.C_MoveToPos.unparse({
+			engine.socket.send(Packets.C_UpdateSelf.unparse({
 				pos: this.pos,
 				rot: this.rot,
 			}));
