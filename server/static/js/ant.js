@@ -4,7 +4,7 @@ import Packets from './packets-json.js';
 export class Ant {
 	constructor(face, {pos, rot=0}) {
 		this.face = face;
-		this.pos = pos;
+		this.pos = new Vec2(...pos);
 		this.rot = rot;
 		
 		this.netCategory = 'ant';
@@ -63,8 +63,6 @@ export class PlayerAnt extends Ant {
 		this.secsSinceNet = 0;
 		this.netDirty = false;
 	}
-	
-	// TODO: loadDiff that ignores small changes
 	
 	onUpdate(dt, engine) {
 		if (engine.keyStates.KeyA || engine.keyStates.ArrowLeft) {

@@ -122,7 +122,15 @@ class ChatterWorld:
 			# TODO: Limit to nearby entities
 			for entity in self.entities.values():
 				if client in entity.seen_by:
-					entity_diffs[entity.id] = entity.diff
+					# Don't send self-diffs, unless correcting
+					if entity == client.entity:
+						if entity.correcting:
+							entity_diffs[entity.id] = entity.diff
+							correcting = False
+						else:
+							entity_diffs[entity.id] = {}
+					else:
+						entity_diffs[entity.id] = entity.diff
 				else:
 					entity_diffs[entity.id] = entity.data
 				entity.temp_seen_by.add(client)
