@@ -7,6 +7,7 @@ import Packets from './packets-json.js';
 
 const faceInput = document.getElementById('face-input');
 const connectButton = document.getElementById('connect');
+const bellSelect = document.getElementById('bells');
 
 const wsConnectUrl = new URL('connect', location);
 wsConnectUrl.protocol = 'ws:';
@@ -32,6 +33,13 @@ async function runGame() {
 	const engine = window.engine = new Engine(
 		document.getElementById('main-canvas'), socket);
 	engine.start();
+	
+	// Testing
+	window.addEventListener('keydown', e => {
+		if (e.repeat || !bellSelect.value) return;
+		engine.audio[`play${bellSelect.value}Bell`](
+			e.key.codePointAt(0), 1);
+	});
 	
 	function spawnEntity(id, data) {
 		let cls = undefined;

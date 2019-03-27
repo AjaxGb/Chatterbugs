@@ -1,3 +1,4 @@
+import GameAudio from './audio.js';
 import { removeWhere } from './utils.js';
 
 export default class Engine {
@@ -6,6 +7,7 @@ export default class Engine {
 		this.canvas = canvas;
 		this.ctx = canvas.getContext('2d');
 		this.socket = socket;
+		this.audio = new GameAudio();
 		
 		this.state = Engine.STATE_UNSTARTED;
 		
