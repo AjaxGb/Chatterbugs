@@ -29,6 +29,7 @@ for name in [
 	'S_CloseWorld',
 	'S_UpdateWorld',
 	'C_UpdateSelf',
+	'C_MakeBox',
 	]:
 	packet = PacketType(name)
 	types[name] = packet

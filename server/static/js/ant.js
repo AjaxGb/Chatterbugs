@@ -14,7 +14,7 @@ const antNetLerps = {
 	rot: lerpAngle,
 };
 
-export class Ant extends Entity {
+export default class Ant extends Entity {
 	static selectEntityClass(registry, id, data) {
 		if (!registry.playerFace) {
 			throw new Error(
@@ -144,7 +144,20 @@ export class PlayerAnt extends Ant {
 		
 		this.speechBox.addEventListener('keydown', e => {
 			if (e.code === 'Escape') this.speech = null;
-			if (e.code === 'Enter' && !e.shiftKey) this.speech = null;
+			
+			if (e.code === 'Enter' && !e.shiftKey) {
+				const speech = this.speech;
+				this.speech = null;
+				
+				if (speech && speech.startsWith('BOX:')) {
+					engine.socket.send(
+						Packets.C_MakeBox.unparse({
+							pos: this.pos,
+							rot: this.rot,
+							text: speech.substr(4),
+						}));
+				}
+			}
 			
 			if (bellSelect.value) {
 				// TODO: Fix hacks

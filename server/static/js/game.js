@@ -1,7 +1,8 @@
 import Socket from './socket.js';
 import { EntityTypeRegistry } from './entity.js';
 import Engine from './engine.js';
-import { Ant } from './ant.js';
+import Ant from './ant.js';
+import Box from './box.js';
 
 const faceInput = document.getElementById('face-input');
 const connectButton = document.getElementById('connect');
@@ -30,6 +31,7 @@ async function runGame() {
 	
 	const entityTypes = new EntityTypeRegistry(playerFace)
 		.register(Ant)
+		.register(Box)
 		;
 	
 	const engine = window.engine = new Engine(
