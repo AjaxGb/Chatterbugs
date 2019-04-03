@@ -26,6 +26,11 @@ export default class Vec2 {
 		return new Vec2(...vec);
 	}
 	
+	static fromObj(vec) {
+		if (vec instanceof Vec2) return vec;
+		return new Vec2(vec.x, vec.y);
+	}
+	
 	static fromAngle(angle, length=1) {
 		return new Vec2(
 			Math.cos(angle) * length,

@@ -5,7 +5,7 @@ import { Ant } from './ant.js';
 
 const faceInput = document.getElementById('face-input');
 const connectButton = document.getElementById('connect');
-const bellSelect = document.getElementById('bells');
+window.bellSelect = document.getElementById('bells');
 
 const wsConnectUrl = new URL('connect', location);
 wsConnectUrl.protocol = 'ws:';
@@ -36,13 +36,6 @@ async function runGame() {
 		document.getElementById('main-canvas'),
 		socket,
 		entityTypes);
-	
-	// Testing
-	window.addEventListener('keydown', e => {
-		if (e.repeat || !bellSelect.value) return;
-		engine.audio[`play${bellSelect.value}Bell`](
-			e.key.codePointAt(0), 1);
-	});
 	
 	await engine.run();
 }

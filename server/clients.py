@@ -38,5 +38,7 @@ class WSClient:
 					self.entity.pos = Point(*p.pos)
 				if hasattr(p, 'rot'):
 					self.entity.rot = p.rot
+				if hasattr(p, 'speech'):
+					self.entity.speech = p.speech
 			else:
 				self.log('UNEXPECTED PACKET:', p)
