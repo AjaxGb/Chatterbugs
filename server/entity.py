@@ -29,16 +29,34 @@ def dataprop(name):
 	return property(getter, setter)
 
 class EntityBase:
-	def __init__(self, pos, rot=0, *, id=None):
+	def __init__(self, pos, rot=0, *, id=None, static=False):
 		self.world = None
 		self.data = {'type': type(self).type_id}
 		self.diff = {}
 		self.seen_by = set()
 		self.temp_seen_by = set()
-		self.id = id or str(uuid4())
+		
+		if static or not id:
+			uuid = uuid4()
+		
+		self.id = id or str(uuid)
+		
+		if static:
+			self.static_id = int(uuid) % 2**32
+		else:
+			self.static_id = None
 		
 		self.pos = pos
 		self.rot = rot
 	
 	pos = dataprop('pos')
 	rot = dataprop('rot')
+	
+	@property
+	def is_static(self):
+		return self.static_id != None
+	
+	def get_aabb(self):
+		x, y = self.pos
+		r = self.radius
+		return (x - r, y - r, x + r, y + r)

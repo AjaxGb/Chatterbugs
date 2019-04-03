@@ -29,6 +29,10 @@ export function drawText(ctx, text, x, y, rot=0, offx=0, offy=0) {
 	}
 }
 
+export function peek(arr) {
+	return arr[arr.length - 1];
+}
+
 export function randomAngle() {
 	return Math.random() * TAU - Math.PI;
 }
@@ -43,6 +47,18 @@ export function clampedAbs(n, max) {
 
 export function floorMod(n, d) {
 	return (n % d + d) % d;
+}
+
+export function lerp(a, b, t) {
+	return a + t * (b - a);
+}
+
+export function lerpAngle(a, b, t) {
+	return a + t * normalizeAngle(b - a);
+}
+
+export function inverseLerp(a, b, x) {
+	return (x - a) / (b - a);
 }
 
 export function normalizeAngle(a) {

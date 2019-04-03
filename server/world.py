@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from server.entity import Point
 from server.ant import Ant
 import server.packets_json as packets
+from rtree import index as rtree
 
 class ChatterUniverse:
 	def __init__(self):
@@ -63,6 +64,8 @@ class ChatterWorld:
 		self.universe = None
 		self.entities = {}
 		self.clients = {}
+		self.dynamic_rtree = None
+		self.static_rtree = rtree.Index()
 	
 	def add_client(self, client):
 		if (client.world):

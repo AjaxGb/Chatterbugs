@@ -1,27 +1,39 @@
 import Vec2 from './vec2.js';
+import Entity from './entity.js';
 import Packets from './packets-json.js';
+import { lerpAngle } from './utils.js';
 
-export class Ant {
-	constructor(face, {pos, rot=0}) {
-		this.face = face;
-		this.pos = new Vec2(...pos);
-		this.rot = rot;
+const antNetNorms = {
+	pos: Vec2.fromIter,
+	rot: null,
+};
+
+const antNetLerps = {
+	pos: Vec2.lerpPosition,
+	rot: lerpAngle,
+};
+
+export class Ant extends Entity {
+	static selectEntityClass(registry, id, data) {
+		if (!registry.playerFace) {
+			throw new Error(
+				'Tried to spawn Ant before setting playerFace');
+		}
+		return (registry.playerFace === id)
+			? PlayerAnt
+			: RemoteAnt;
+	}
+	
+	constructor(face, data) {
+		super(face, data);
 		
-		this.netCategory = 'ant';
-		this.netID = face;
-		
-		this.segments = [0.3, 0.4, -0.2];
+		this.segments = [0, 0];
 		
 		this.speed = 100;
 		this.angSpeed = 0.05;
 	}
 	
-	loadDiff({pos, rot}) {
-		if (pos != null) this.pos = new Vec2(...pos);
-		if (rot != null) this.rot = rot;
-	}
-	
-	onRender(ctx, dt, engine) {
+	onDraw({ctx}) {
 		ctx.save();
 		ctx.translate(...this.pos);
 		ctx.rotate(this.rot);
@@ -50,11 +62,15 @@ export class Ant {
 		ctx.font = '20px monospace';
 		ctx.textAlign = 'center';
 		ctx.textBaseline = 'middle';
-		ctx.fillText(this.face, 0, 0);
+		ctx.fillText(this.id, 0, 0);
 		
 		ctx.restore();
 	}
 }
+
+Ant.prototype.netNormalizers = antNetNorms;
+Ant.prototype.netLerps = antNetLerps;
+Ant.prototype.typeID = 'ant';
 
 export class PlayerAnt extends Ant {
 	constructor(face, {...data}) {
@@ -64,7 +80,7 @@ export class PlayerAnt extends Ant {
 		this.netDirty = false;
 	}
 	
-	onUpdate(dt, engine) {
+	onTick({dt, engine}) {
 		if (engine.keyStates.KeyA || engine.keyStates.ArrowLeft) {
 			this.rot -= this.angSpeed;
 			this.netDirty = true;
@@ -74,8 +90,17 @@ export class PlayerAnt extends Ant {
 			this.netDirty = true;
 		}
 		
+		let walk = 0;
 		if (engine.keyStates.KeyW || engine.keyStates.ArrowUp) {
-			const movement = Vec2.fromAngle(this.rot + Math.PI / 2, this.speed * dt);
+			walk += 1;
+		}
+		if (engine.keyStates.KeyS || engine.keyStates.ArrowDown) {
+			walk -= 1;
+		}
+		
+		if (walk !== 0) {
+			const movement = Vec2.fromAngle(this.rot + Math.PI / 2,
+				walk * this.speed * dt);
 			this.pos = Vec2.add(this.pos, movement);
 			this.netDirty = true;
 		}
@@ -93,6 +118,8 @@ export class PlayerAnt extends Ant {
 		}
 	}
 }
+
+PlayerAnt.prototype.noInterpolation = true;
 
 export class RemoteAnt extends Ant {
 	

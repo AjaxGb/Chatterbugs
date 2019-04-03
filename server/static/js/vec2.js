@@ -1,7 +1,11 @@
-import { randomAngle, clamped } from './utils.js';
+import { randomAngle, clamped, lerp, lerpAngle } from './utils.js';
 
 export default class Vec2 {
 	constructor(x, y) {
+		if (typeof x !== 'number' || typeof y !== 'number') {
+			throw new Error('Vec2 only takes numbers');
+		}
+		
 		Object.defineProperties(this, {
 			x: {
 				value: x,
@@ -9,9 +13,17 @@ export default class Vec2 {
 			},
 			y: {
 				value: y,
-				enumerable: false,
+				enumerable: true,
 			},
 		});
+	}
+	
+	static fromIter(vec) {
+		if (vec instanceof Vec2) return vec;
+		if ([...vec].length !== 2) {
+			throw new Error('Argument is not of length 2');
+		}
+		return new Vec2(...vec);
 	}
 	
 	static fromAngle(angle, length=1) {
@@ -24,8 +36,17 @@ export default class Vec2 {
 		return Vec2.fromAngle(randomAngle(), radius);
 	}
 	
-	static get zero() { return zero; }
-	static get one() { return one; }
+	static lerpPosition(a, b, t) {
+		return new Vec2(
+			lerp(a.x, b.x, t),
+			lerp(a.y, b.y, t));
+	}
+	
+	static lerpDirection(a, b, t) {
+		return Vec2.fromAngle(
+			lerpAngle(a.toAngle(), b.toAngle(), t),
+			lerp(a.magnitude, b.magnitude, t));
+	}
 	
 	scaled(scale) {
 		return new Vec2(this.x * scale, this.y * scale);
@@ -130,5 +151,13 @@ export default class Vec2 {
 	}
 }
 
-const zero = new Vec2(0, 0);
-const one = new Vec2(1, 1);
+Object.defineProperties(Vec2, {
+	zero: {
+		value: new Vec2(0, 0),
+		enumerable: true,
+	},
+	one: {
+		value: new Vec2(1, 1),
+		enumerable: true,
+	},
+});

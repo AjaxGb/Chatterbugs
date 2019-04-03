@@ -1,9 +1,7 @@
-import Engine from './engine.js';
-import Vec2 from './vec2.js';
-import { PlayerAnt, RemoteAnt } from './ant.js';
 import Socket from './socket.js';
-import { waitMillis } from './utils.js';
-import Packets from './packets-json.js';
+import { EntityTypeRegistry } from './entity.js';
+import Engine from './engine.js';
+import { Ant } from './ant.js';
 
 const faceInput = document.getElementById('face-input');
 const connectButton = document.getElementById('connect');
@@ -30,9 +28,14 @@ async function runGame() {
 	
 	await socket.send(playerFace);
 	
+	const entityTypes = new EntityTypeRegistry(playerFace)
+		.register(Ant)
+		;
+	
 	const engine = window.engine = new Engine(
-		document.getElementById('main-canvas'), socket);
-	engine.start();
+		document.getElementById('main-canvas'),
+		socket,
+		entityTypes);
 	
 	// Testing
 	window.addEventListener('keydown', e => {
@@ -41,66 +44,5 @@ async function runGame() {
 			e.key.codePointAt(0), 1);
 	});
 	
-	function spawnEntity(id, data) {
-		let cls = undefined;
-		switch (data.type) {
-			case 'ant': {
-				if (id === playerFace) {
-					cls = PlayerAnt;
-				} else {
-					cls = RemoteAnt;
-				}
-				break;
-			}
-		}
-		
-		if (cls === undefined) {
-			console.error('Unknown entity type', data.type);
-		} else {
-			engine.addObject(new cls(id, data));
-		}
-	}
-	
-	while (true) {
-		const mess = await socket.recv();
-		const p = Packets.parse(mess.data);
-		
-		switch (p._type) {
-			case Packets.S_OpenWorld: {
-				engine.killAllObjects();
-				
-				for (let id in p.entities) {
-					spawnEntity(id, p.entities[id]);
-				}
-				break;
-			}
-			case Packets.S_UpdateWorld: {
-				for (let obj of engine.objects) {
-					if (!obj.netID) continue;
-					
-					const diff = p.entities[obj.netID];
-					if (!diff) {
-						obj.isDead = true;
-						continue;
-					}
-					
-					delete p.entities[obj.netID];
-					obj.loadDiff(diff);
-				}
-				
-				for (let id in p.entities) {
-					spawnEntity(id, p.entities[id]);
-				}
-				
-				break;
-			}
-			case Packets.S_CloseWorld: {
-				engine.killAllObjects();
-				break;
-			}
-			default: {
-				console.error('Unexpected packet received!', p, mess);
-			}
-		}
-	}
+	await engine.run();
 }
