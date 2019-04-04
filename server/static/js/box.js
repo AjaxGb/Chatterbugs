@@ -13,13 +13,13 @@ export default class Box extends Entity {
 	onDraw({ctx}) {
 		ctx.save();
 		
-		ctx.font = '10px monospace';
+		ctx.font = '18px monospace';
 		ctx.textAlign = 'center';
 		ctx.textBaseline = 'middle';
 		ctx.translate(...this.pos);
 		ctx.rotate(this.rot);
 		
-		ctx.strokeRect(-100, -100, 100, 100);
+		ctx.strokeRect(-50, -50, 100, 100);
 		ctx.fillText(this.text, 0, 0);
 		
 		ctx.restore();
