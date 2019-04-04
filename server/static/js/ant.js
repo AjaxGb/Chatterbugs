@@ -143,11 +143,13 @@ export class PlayerAnt extends Ant {
 		});
 		
 		this.speechBox.addEventListener('keydown', e => {
-			if (e.code === 'Escape') this.speech = null;
+			if (e.code === 'Escape') {
+				this.setNetProps({speech: null});
+			}
 			
 			if (e.code === 'Enter' && !e.shiftKey) {
 				const speech = this.speech;
-				this.speech = null;
+				this.setNetProps({speech: null});
 				
 				if (speech && speech.startsWith('BOX:')) {
 					engine.socket.send(
@@ -173,7 +175,7 @@ export class PlayerAnt extends Ant {
 			}
 			
 			if (e.code === 'KeyT') {
-				this.speech = '';
+				this.setNetProps({speech: ''});
 				this.speechBox.disabled = false;
 				this.speechBox.focus({preventScroll: true});
 				e.preventDefault();
