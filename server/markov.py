@@ -28,10 +28,15 @@ with open("sourcetext/CowboySongs.txt", encoding="utf-8") as text_file:
     dictionary = defaultdict(Word)
     last_word = ""
     for line in text_file:
-        for word in re.split("[_\"\-\-,. !?\n“”—1234567890]|(?<=\s)[\']|[\'](?=\s)", line):
+        line = line.strip("\n")
+        if len(line) == 0:
+            continue
+        #print(line)
+        for word in re.split("[_\"\-\-,. !?“”—1234567890]|\s+| |(?<=\s\r)[\']|[\'](?=\s)", line):
             word = word.strip(string.punctuation)
             if len(word) == 0:
-                break
+                #print("length 0")
+                continue
             dictionary[last_word].add_word(word)
             # add it to "" if it starts with a capital letter.
             if word[0].isupper():
