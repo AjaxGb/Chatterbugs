@@ -15,17 +15,21 @@ class Word:
         self.size += 1
     
     def get_word(self):
-        index = random.randrange(self.size)
-        c = 0
-        for word, count in self.contents.items():
-            c += count
-            if c >= index:
-                return word
-            
+        if(self.size > 0):
+            index = random.randrange(self.size)
+            c = 0
+            for word, count in self.contents.items():
+                c += count
+                if c >= index:
+                    return word
+        else:
+            return ""
 
 # Load in file
 with open("sourcetext/CowboySongs.txt", encoding="utf-8") as text_file:
     dictionary = defaultdict(Word)
+    dictionary2 = defaultdict(Word)
+    last_last_word = ""
     last_word = ""
     for line in text_file:
         line = line.strip("\n")
@@ -38,17 +42,28 @@ with open("sourcetext/CowboySongs.txt", encoding="utf-8") as text_file:
                 #print("length 0")
                 continue
             dictionary[last_word].add_word(word)
+            #print(last_last_word + last_word)
+            dictionary2[last_last_word + last_word].add_word(word)
             # add it to "" if it starts with a capital letter.
             if word[0].isupper():
                 if len(word) > 1:
                     if not word[1].isupper():
                         dictionary[""].add_word(word)
+                        dictionary2[""].add_word(word)
                 else:
                     dictionary[""].add_word(word)
+                    dictionary2[""].add_word(word)
+            last_last_word = last_word
             last_word = word
     if __name__ == "__main__":
-        print(dictionary[""].contents)
-        str = ""
+        #print(dictionary[""].contents)
+        print(dictionary2[""].contents)
+        laststr = ""
+        st = ""
         for i in range(0,100):
-            str = dictionary[str].get_word()
-            print(str)
+            key = laststr+st
+            laststr = st
+            st = dictionary2[key].get_word()
+            if st == "" or random.randrange(7) < 2: # Mixed order
+                st = dictionary[laststr].get_word()
+            print(st)
