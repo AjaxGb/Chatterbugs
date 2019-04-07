@@ -1,11 +1,12 @@
 import Socket from './socket.js';
 import { EntityTypeRegistry } from './entity.js';
 import Engine from './engine.js';
-import { Ant } from './ant.js';
+import Ant from './ant.js';
+import Box from './box.js';
 
 const faceInput = document.getElementById('face-input');
 const connectButton = document.getElementById('connect');
-const bellSelect = document.getElementById('bells');
+window.bellSelect = document.getElementById('bells');
 
 const wsConnectUrl = new URL('connect', location);
 wsConnectUrl.protocol = 'ws:';
@@ -30,19 +31,13 @@ async function runGame() {
 	
 	const entityTypes = new EntityTypeRegistry(playerFace)
 		.register(Ant)
+		.register(Box)
 		;
 	
 	const engine = window.engine = new Engine(
 		document.getElementById('main-canvas'),
 		socket,
 		entityTypes);
-	
-	// Testing
-	window.addEventListener('keydown', e => {
-		if (e.repeat || !bellSelect.value) return;
-		engine.audio[`play${bellSelect.value}Bell`](
-			e.key.codePointAt(0), 1);
-	});
 	
 	await engine.run();
 }

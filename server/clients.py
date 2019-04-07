@@ -1,6 +1,7 @@
 import asyncio
 import server.packets_json as packets
 from server.entity import Point
+from server.box import Box
 
 class WSClient:
 	def __init__(self, ws, face):
@@ -38,5 +39,10 @@ class WSClient:
 					self.entity.pos = Point(*p.pos)
 				if hasattr(p, 'rot'):
 					self.entity.rot = p.rot
+				if hasattr(p, 'speech'):
+					self.entity.speech = p.speech
+			elif p.ptype == packets.C_MakeBox:
+				box = Box(p.pos, p.rot, p.text)
+				self.world.add_entity(box)
 			else:
 				self.log('UNEXPECTED PACKET:', p)

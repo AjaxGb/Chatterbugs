@@ -1,6 +1,7 @@
 import GameAudio from './audio.js';
 import { removeWhere } from './utils.js';
 import Packets from './packets-json.js';
+import Vec2 from './vec2.js';
 
 export class EngineEvent extends Event {
 	constructor(type, engine, props={}, cancelable=false) {
@@ -43,6 +44,12 @@ export class DrawEvent extends EngineEvent {
 export class DiffEvent extends EngineEvent {
 	constructor(engine, diff) {
 		super('diff', engine, {diff: diff});
+	}
+}
+
+export class DieEvent extends EngineEvent {
+	constructor(engine) {
+		super('die', engine, {}, true);
 	}
 }
 
@@ -89,7 +96,7 @@ export default class Engine {
 		
 		const keyHandler = e => {
 			const tagName = e.target.tagName;
-			if (tagName === 'INPUT' || tagName === 'TEXTBOX') {
+			if (tagName === 'INPUT' || tagName === 'TEXTAREA') {
 				return;
 			}
 			
@@ -142,6 +149,21 @@ export default class Engine {
 	
 	get aabb() {
 		return [0, 0, this.width, this.height];
+	}
+	
+	worldToScreen(vec) {
+		// Slight hack: DOMRect has an x and y, so we
+		// can use it as a vector directly here.
+		return vec.sub(this.canvas.getBoundingClientRect());
+	}
+	
+	worldToPage(vec) {
+		// Slight hack: DOMRect has an x and y, so we
+		// can use it as a vector directly here.
+		const rect = this.canvas.getBoundingClientRect();
+		rect.x += window.pageXOffset;
+		rect.y += window.pageYOffset;
+		return vec.sub(rect);
 	}
 	
 	async run() {
@@ -345,7 +367,11 @@ export default class Engine {
 		const drawEvent = new DrawEvent(engine);
 		for (const ent of this.entities.values()) {
 			if (ent.isDead) {
-				this.entities.delete(ent.id);
+				if (ent.dispatchEvent(new DieEvent(this))) {
+					this.entities.delete(ent.id);
+				} else {
+					ent.isDead = false;
+				}
 			} else if (!ent.disabled) {
 				ent.dispatchEvent(drawEvent);
 			}

@@ -1,4 +1,4 @@
-from server.entity import Point, EntityBase
+from server.entity import Point, EntityBase, dataprop
 
 class Ant(EntityBase):
 	type_id = 'ant'
@@ -7,3 +7,7 @@ class Ant(EntityBase):
 		super().__init__(pos, angle, id=client.face,)
 		self.client = client
 		self.correcting = False
+		
+		self.speech = None
+	
+	speech = dataprop('speech')

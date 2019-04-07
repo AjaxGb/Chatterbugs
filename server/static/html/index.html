@@ -1,15 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Chatterbug</title>
+	<title>Chatterbugs</title>
 	<script type="module" src="js/game.js"></script>
+	<style>
+		.ant-speech-box {
+			display: none;
+			position: absolute;
+			border: none;
+			outline: none;
+			resize: none;
+			font: 20px monospace;
+			background: none;
+			color: black;
+			text-align: center;
+			top: 0;
+			left: 0;
+		}
+		
+		.ant-speech-box.typing {
+			display: block;
+		}
+	</style>
 </head>
 <body>
 	<input id="face-input" maxlength="5" minlength="5" required type="text">
 	<input id="connect" type="button" value="Connect">
 	<label>
 		Bells:
-		<select id="bells">
+		<select id="bells" value="Pentatonic">
 			<option value="">None</option>
 			<option value="Pentatonic">Pentatonic</option>
 			<option value="TwelveTone">Twelve Tone</option>

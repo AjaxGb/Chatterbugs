@@ -85,6 +85,7 @@ export default class Entity extends GameEventTarget {
 		if (this.onStart) this.on('start', this.onStart, true);
 		if (this.onTick) this.on('tick', this.onTick);
 		if (this.onDraw) this.on('draw', this.onDraw);
+		if (this.onDie) this.on('die', this.onDie);
 	}
 	
 	skipInterpolation() {
@@ -109,7 +110,7 @@ function loadDiff(obj, diff, normalizers,
 	for (const [key, norm] of Object.entries(normalizers)) {
 		let value = diff[key];
 		
-		if (value != null) {
+		if (value !== undefined) {
 			if (norm) value = norm(value);
 			
 			if (lerps && lerps[key]) {
