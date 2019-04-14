@@ -25,10 +25,11 @@ class Word:
         else:
             return ""
 
-# Load in file
+# Dictionaries should persist after the sourcetexts.
+dictionary = defaultdict(Word)
+dictionary2 = defaultdict(Word)
 with open("sourcetext/CowboySongs.txt", encoding="utf-8") as text_file:
-    dictionary = defaultdict(Word)
-    dictionary2 = defaultdict(Word)
+
     last_last_word = ""
     last_word = ""
     for line in text_file:

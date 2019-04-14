@@ -2,6 +2,7 @@ import asyncio
 import server.packets_json as packets
 from server.entity import Point
 from server.box import Box
+from server.plant import Plant
 
 class WSClient:
 	def __init__(self, ws, face):
@@ -44,5 +45,8 @@ class WSClient:
 			elif p.ptype == packets.C_MakeBox:
 				box = Box(p.pos, p.rot, p.text)
 				self.world.add_entity(box)
+			elif p.ptype == packets.C_MakePlant:
+				plant = Plant(p.pos, p.rot, p.text)
+				self.world.add_entity(plant)
 			else:
 				self.log('UNEXPECTED PACKET:', p)
