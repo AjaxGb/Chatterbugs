@@ -1,4 +1,5 @@
 from server.entity import Point, EntityBase, dataprop
+from server.markov import MarkovSource
 import random
 import math
 
@@ -49,7 +50,7 @@ class Word(EntityBase):
             x = x+math.cos(super().rot)*(len(self.text)+1)*5
             y = y+math.sin(super().rot)*(len(self.text)+1)*5
             # next, calculate offset based on future word.
-            next_word = "branch" # Markov goes here!
+            next_word = self.world.markov.chain(self.text, self.parent_word) # Markov goes here!
 
             # This should be tree-only code.
             new_angle = 0

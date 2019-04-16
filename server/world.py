@@ -6,6 +6,7 @@ from server.plant import Plant
 import server.packets_json as packets
 from rtree import index as rtree
 import random
+from server.markov import MarkovSource
 
 class ChatterUniverse:
 	def __init__(self):
@@ -69,6 +70,8 @@ class ChatterWorld:
 		self.clients = {}
 		self.dynamic_rtree = None
 		self.static_rtree = rtree.Index()
+		self.markov = MarkovSource()
+		self.markov.load("server\sourcetext\CowboySongs.txt")
 	
 	def add_client(self, client):
 		if (client.world):
