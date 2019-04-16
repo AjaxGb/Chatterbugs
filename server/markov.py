@@ -5,7 +5,7 @@ import re
 # markov.py - deals with branching of plants
 
 # markov word class
-class Word:
+class Phrase:
     def __init__(self):
         self.size = 0
         self.contents = Counter()
@@ -26,8 +26,8 @@ class Word:
             return ""
 
 # Dictionaries should persist after the sourcetexts.
-dictionary = defaultdict(Word)
-dictionary2 = defaultdict(Word)
+dictionary = defaultdict(Phrase)
+dictionary2 = defaultdict(Phrase)
 with open("sourcetext/CowboySongs.txt", encoding="utf-8") as text_file:
 
     last_last_word = ""
