@@ -24,9 +24,9 @@ class Plant(EntityBase):
                 self.words.append(w)
                 self.world.add_entity(w)
             elif len(self.words) < 25:
-                # Structural determination. x^y A tree may be best represented by y of around 0.5; a shrub by y = 3
+                # Structural determination. x^y A tree may be best represented by y of around 0.5; a shrub by y = 2
                 # index = random.randint(0, len(self.words)-1)
-                index = int(math.pow(random.random(),0.5)*(len(self.words)-0.001)) # converts to int via truncation
+                index = int(math.pow(random.random(),0.7)*(len(self.words)-0.001)) # converts to int via truncation
                 self.words[index].branch()
                 self.words[-1].parent_word = self.words[index].text
 
@@ -63,7 +63,7 @@ class Word(EntityBase):
             
             good = True
             for b in self.branches:
-                if abs(b.rot - new_angle) < 0.3:
+                if abs(b.rot - new_angle) < 0.3 or next_word == b.text:
                     good = False
             if good:
                 w = Word((x+math.cos(new_angle)*(len(next_word)+1)*5, y+math.sin(new_angle)*(len(next_word)+1)*5), new_angle, next_word)
