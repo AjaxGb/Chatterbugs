@@ -176,11 +176,9 @@ export default class Engine {
 		if (this.state === Engine.STATE_STARTED) return;
 		
 		this.state = Engine.STATE_STARTED;
-		this.nextRenderID = requestAnimationFrame(ms => {
-			// Set the initial millis first time around
-			this.realMillis = ms;
-			this.onRender(ms);
-		});
+		this.realMillis = performance.now();
+		
+		this.nextRenderID = requestAnimationFrame(this.onRender);
 		
 		const event = new StartEvent(this, false);
 		for (const ent of this.entities.values()) {
