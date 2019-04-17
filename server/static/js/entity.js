@@ -43,7 +43,7 @@ export default class Entity extends GameEventTarget {
 		
 		if (this.netLerps && !this.noInterpolation) {
 			
-			const lerpDiff = loadDiff(
+			const lerpDiff = loadDiff(this,
 				this, data, this.netNormalizers,
 				{}, this.netLerps);
 			
@@ -75,7 +75,7 @@ export default class Entity extends GameEventTarget {
 			this.on('diff', interpolateOnDiff);
 			this.on('tick', interpolateOnTick);
 		} else {
-			loadDiff(this, data, this.netNormalizers);
+			loadDiff(this, this, data, this.netNormalizers);
 			this.on('diff', noInterpolateOnDiff);
 		}
 		
@@ -102,7 +102,7 @@ export default class Entity extends GameEventTarget {
 	}
 }
 
-function loadDiff(obj, diff, normalizers,
+function loadDiff(entity, obj, diff, normalizers,
 		lerpBase=undefined, lerps=undefined) {
 	
 	const lerpObj = Object.assign({}, lerpBase);
@@ -110,14 +110,13 @@ function loadDiff(obj, diff, normalizers,
 	for (const [key, norm] of Object.entries(normalizers)) {
 		let value = diff[key];
 		
-		if (value !== undefined) {
-			if (norm) value = norm(value);
-			
-			if (lerps && lerps[key]) {
-				lerpObj[key] = value;
-			} else {
-				obj[key] = value;
-			}
+		if (value !== undefined && norm) value = norm.call(entity, value);
+		if (value === undefined) continue;
+		
+		if (lerps && lerps[key]) {
+			lerpObj[key] = value;
+		} else {
+			obj[key] = value;
 		}
 	}
 	
@@ -125,7 +124,7 @@ function loadDiff(obj, diff, normalizers,
 }
 
 function noInterpolateOnDiff({diff}) {
-	loadDiff(this, diff, this.netNormalizers);
+	loadDiff(this, this, diff, this.netNormalizers);
 }
 
 function netLerp(entity, key) {
@@ -154,7 +153,7 @@ function interpolateOnStart({realMillis: millis}) {
 function interpolateOnDiff({diff, realMillis: millis}) {
 	const lastSnap = peek(this.lerpSnapshots);
 	const otherDiff = {};
-	const lerpDiff = loadDiff(
+	const lerpDiff = loadDiff(this,
 		otherDiff, diff, this.netNormalizers,
 		lastSnap.lerped, this.netLerps);
 	
