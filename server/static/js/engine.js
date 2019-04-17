@@ -355,13 +355,6 @@ export default class Engine {
 			if (done) c.callback();
 			return done;
 		});
-		
-		if (this.bgFill) {
-			ctx.fillStyle = this.bgFill;
-			ctx.fillRect(0, 0, this.width, this.height);
-		} else {
-			ctx.clearRect(0, 0, this.width, this.height);
-		}
 
 		const tickEvent = new TickEvent(this);
 		for (const ent of this.entities.values()) {
@@ -376,6 +369,15 @@ export default class Engine {
 		}
 		ctx.save();
 		ctx.translate(...this.cameraPos.scaled(-1));
+		
+		if (this.bgFill) {
+			ctx.fillStyle = this.bgFill;
+			ctx.fillRect(...this.cameraPos, this.width, this.height);
+		} else {
+			ctx.clearRect(...this.cameraPos, this.width, this.height);
+		}
+
+		ctx.fillStyle = 'black';
 		
 		const drawEvent = new DrawEvent(engine);
 		for (const ent of this.entities.values()) {

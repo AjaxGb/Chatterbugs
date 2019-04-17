@@ -42,6 +42,9 @@ async function runGame() {
 		document.getElementById('main-canvas'),
 		socket,
 		entityTypes);
+
+	const [bgTile] = await engine.loadImages(['ChatterTile'], 'img/', '.png');
+	engine.bgFill = engine.ctx.createPattern(bgTile, 'repeat');
 	
 	await engine.run();
 }

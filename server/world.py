@@ -71,7 +71,7 @@ class ChatterWorld:
 		self.dynamic_rtree = None
 		self.static_rtree = rtree.Index()
 		self.markov = MarkovSource()
-		self.markov.load("server\sourcetext\CowboySongs.txt")
+		self.markov.load("server\sourcetext\AliceInWonderland.txt")
 	
 	def add_client(self, client):
 		if (client.world):
@@ -164,6 +164,5 @@ class ChatterWorld:
 	
 	def _tick(self):
 		# Plants
-		if random.random() > 0.96 and len(self.plants) > 0:
-			self.plants[random.randint(0, len(self.plants)-1)].branch()
-		pass
+		if len(self.plants) > 0 and random.random() > 0.96:
+			random.choice(self.plants).branch()
