@@ -3,6 +3,8 @@ import { EntityTypeRegistry } from './entity.js';
 import Engine from './engine.js';
 import Ant from './ant.js';
 import Box from './box.js';
+import Plant from './plant.js';
+import Word from './word.js';
 
 const faceInput = document.getElementById('face-input');
 const connectButton = document.getElementById('connect');
@@ -32,6 +34,8 @@ async function runGame() {
 	const entityTypes = new EntityTypeRegistry(playerFace)
 		.register(Ant)
 		.register(Box)
+		.register(Plant)
+		.register(Word)
 		;
 	
 	const engine = window.engine = new Engine(

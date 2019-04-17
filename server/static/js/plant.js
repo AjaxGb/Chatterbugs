@@ -19,7 +19,7 @@ export default class Plant extends Entity {
 		ctx.translate(...this.pos);
 		ctx.rotate(this.rot);
 		
-		ctx.strokeRect(-50, -50, 100, 100);
+		ctx.strokeRect(-15, -15, 30, 30);
 		ctx.fillText(this.text, 0, 0);
 		
 		ctx.restore();

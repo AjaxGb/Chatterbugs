@@ -35,6 +35,8 @@ for (let name of [
 	'S_CloseWorld',
 	'C_UpdateSelf',
 	'C_MakeBox',
+	'C_MakePlant',
+	'C_MakeWord',
 ]) {
 	Packets[name] = new PacketType(name);
 }

@@ -72,6 +72,8 @@ export default class Engine {
 		
 		this.onRender = this.onRender.bind(this);
 		
+		this.cameraPos = Vec2.zero;
+
 		this.seconds = 0;
 		this.frame = -1;
 		
@@ -146,6 +148,10 @@ export default class Engine {
 	get height() {
 		return this.canvas.height;
 	}
+
+	get player() {
+		return this.entities.get(this.entityTypes.playerFace);
+	}
 	
 	get aabb() {
 		return [0, 0, this.width, this.height];
@@ -154,7 +160,7 @@ export default class Engine {
 	worldToScreen(vec) {
 		// Slight hack: DOMRect has an x and y, so we
 		// can use it as a vector directly here.
-		return vec.sub(this.canvas.getBoundingClientRect());
+		return vec.sub(this.canvas.getBoundingClientRect()).sub(this.cameraPos);
 	}
 	
 	worldToPage(vec) {
@@ -163,7 +169,7 @@ export default class Engine {
 		const rect = this.canvas.getBoundingClientRect();
 		rect.x += window.pageXOffset;
 		rect.y += window.pageYOffset;
-		return vec.sub(rect);
+		return vec.sub(rect).sub(this.cameraPos);
 	}
 	
 	async run() {
@@ -357,13 +363,20 @@ export default class Engine {
 		} else {
 			ctx.clearRect(0, 0, this.width, this.height);
 		}
-		
+
 		const tickEvent = new TickEvent(this);
 		for (const ent of this.entities.values()) {
 			if (!ent.disabled && !ent.isDead) {
 				ent.dispatchEvent(tickEvent);
 			}
 		}
+
+		const player = this.player;
+		if (player) {
+			this.cameraPos = player.pos.sub(new Vec2(this.width / 2, this.height / 2));
+		}
+		ctx.save();
+		ctx.translate(...this.cameraPos.scaled(-1));
 		
 		const drawEvent = new DrawEvent(engine);
 		for (const ent of this.entities.values()) {
@@ -377,6 +390,8 @@ export default class Engine {
 				ent.dispatchEvent(drawEvent);
 			}
 		}
+
+		ctx.restore();
 	}
 }
 

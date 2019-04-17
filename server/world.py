@@ -2,8 +2,11 @@ import asyncio
 from contextlib import asynccontextmanager
 from server.entity import Point
 from server.ant import Ant
+from server.plant import Plant
 import server.packets_json as packets
 from rtree import index as rtree
+import random
+from server.markov import MarkovSource
 
 class ChatterUniverse:
 	def __init__(self):
@@ -63,9 +66,12 @@ class ChatterWorld:
 		self.id = id
 		self.universe = None
 		self.entities = {}
+		self.plants = []
 		self.clients = {}
 		self.dynamic_rtree = None
 		self.static_rtree = rtree.Index()
+		self.markov = MarkovSource()
+		self.markov.load("server\sourcetext\CowboySongs.txt")
 	
 	def add_client(self, client):
 		if (client.world):
@@ -100,6 +106,8 @@ class ChatterWorld:
 		if self.entities.setdefault(entity.id, entity) != entity:
 			raise KeyError(f'{entity.id} is already in use')
 		entity.world = self
+		if isinstance(entity, Plant):
+			self.plants.append(entity)
 	
 	def remove_entity(self, entity):
 		if self.entities.get(entity.id) != entity:
@@ -155,4 +163,7 @@ class ChatterWorld:
 			entity.diff.clear()
 	
 	def _tick(self):
+		# Plants
+		if random.random() > 0.96 and len(self.plants) > 0:
+			self.plants[random.randint(0, len(self.plants)-1)].branch()
 		pass

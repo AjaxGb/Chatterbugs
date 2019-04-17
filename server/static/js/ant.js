@@ -191,13 +191,23 @@ export class PlayerAnt extends Ant {
 				const speech = this.speech;
 				this.setNetProps({speech: null});
 				
-				if (speech && speech.startsWith('BOX:')) {
-					engine.socket.send(
-						Packets.C_MakeBox.unparse({
-							pos: this.pos,
-							rot: this.rot,
-							text: speech.substr(4),
-						}));
+				if (speech) {
+					if(speech.startsWith('BOX:')) {
+						engine.socket.send(
+							Packets.C_MakeBox.unparse({
+								pos: this.pos,
+								rot: this.rot,
+								text: speech.substr(4).trim(),
+							}));
+					}
+					else if(speech.startsWith('PLANT:')) {
+						engine.socket.send(
+							Packets.C_MakePlant.unparse({
+								pos: this.pos,
+								rot: this.rot,
+								text: speech.substr(6).trim(),
+							}));
+					}
 				}
 			}
 			
