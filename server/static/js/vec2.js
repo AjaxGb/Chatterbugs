@@ -138,6 +138,12 @@ export default class Vec2 {
 		return this.magnitude;
 	}
 	
+	normalized(length=1) {
+		return new Vec2(
+			this.x / this.magnitude * length,
+			this.y / this.magnitude * length);
+	}
+	
 	toAngle() {
 		return Math.atan2(this.y, this.x);
 	}

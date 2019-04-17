@@ -214,8 +214,9 @@ export default class Engine {
 				for (const [id, ent] of this.entities) {
 					
 					const diff = p.entities[id];
-					if (!diff) {
-						ent.isDead = true;
+					if (!diff || ent.isDead) {
+						// TODO: onDead callback?
+						this.entities.delete(id);
 						continue;
 					}
 					

@@ -79,3 +79,20 @@ export function waitMillis(ms) {
 		setTimeout(resolve, ms);
 	});
 }
+
+export function approxEqual(a, b, epsilon=0.0001) {
+	return Math.abs(a - b) <= epsilon;
+}
+
+export function defineConsts(obj, props) {
+	for (const key in props) {
+		Object.defineProperty(obj, key, {
+			enumerable: true,
+			value: props[key],
+		});
+	}
+}
+
+export function weightTowardsCenter(p, damping=5) {
+	return Math.sin(TAU * p) / (TAU + damping) + p;
+}
