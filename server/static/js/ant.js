@@ -1,7 +1,7 @@
 import Vec2 from './vec2.js';
 import Entity from './entity.js';
 import Packets from './packets-json.js';
-import { lerpAngle } from './utils.js';
+import { lerpAngle, TAU, weightTowardsCenter } from './utils.js';
 
 const antNetNorms = {
 	pos: Vec2.fromIter,
@@ -13,6 +13,8 @@ const antNetLerps = {
 	pos: Vec2.lerpPosition,
 	rot: lerpAngle,
 };
+
+const gutSize = 80;
 
 export default class Ant extends Entity {
 	static selectEntityClass(registry, id, data) {
@@ -32,6 +34,15 @@ export default class Ant extends Entity {
 		
 		this.speed = 100;
 		this.angSpeed = 0.05;
+		
+		this.gut = Object.create(null);
+		const gutCanvas = document.createElement('canvas');
+		gutCanvas.width = gutSize;
+		gutCanvas.height = gutSize;
+		this.gutCtx = gutCanvas.getContext('2d');
+		this.gutCtx.font = '20px monospace';
+		this.gutCtx.textAlign = 'center';
+		this.gutCtx.textBaseline = 'middle';
 	}
 	
 	get speechBox() {
@@ -49,6 +60,34 @@ export default class Ant extends Entity {
 		return (this.speechBox.classList.contains('typing'))
 			? this.speechBox.value
 			: null;
+	}
+	
+	rerenderGut() {
+		this.gutCtx.clearRect(0, 0, gutSize, gutSize);
+		
+		for (const char in this.gut) {
+			for (let i = this.gut[char]; i > 0; i--) {
+				// Use a hash to get this char's pos and rot
+				let hash = char.codePointAt(0) ^ (i << 24);
+				hash = (hash ^ 61) ^ (hash >>> 16);
+				hash = (hash + (hash << 3))|0;
+				hash ^= hash >>> 4;
+				hash = (hash * 0x27d4eb2d)|0;
+				hash ^= hash >>> 15;
+				
+				const rot = (hash & 0xFF) / 0xFF * TAU;
+				const x = ((hash >>> 8) & 0xFFF) / 0xFFF
+					* (gutSize - 14) + 7;
+				const y = (hash >>> 20) / 0xFFF
+					* (gutSize - 14) + 7;
+				
+				this.gutCtx.save();
+				this.gutCtx.translate(x, y);
+				this.gutCtx.rotate(rot);
+				this.gutCtx.fillText(char, 0, 0);
+				this.gutCtx.restore();
+			}
+		}
 	}
 	
 	set speech(value) {
@@ -93,7 +132,8 @@ export default class Ant extends Entity {
 		}
 		
 		// Butt
-		ctx.strokeRect(-40, 18 - 80, 80, 80);
+		ctx.strokeRect(-gutSize / 2, 18 - gutSize, gutSize, gutSize);
+		ctx.drawImage(this.gutCtx.canvas, -gutSize / 2, 18 - gutSize);
 		
 		for (; i > 1; i--) {
 			ctx.restore();
