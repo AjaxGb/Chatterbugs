@@ -217,20 +217,6 @@ export class PlayerAnt extends Ant {
 					e.key.codePointAt(0), 1);
 			}
 		});
-		
-		addEventListener('keydown', e => {
-			const tagName = e.target.tagName;
-			if (tagName === 'INPUT' || tagName === 'TEXTAREA') {
-				return;
-			}
-			
-			if (e.code === 'KeyT') {
-				this.setNetProps({speech: ''});
-				this.speechBox.disabled = false;
-				this.speechBox.focus({preventScroll: true});
-				e.preventDefault();
-			}
-		});
 	}
 	
 	setNetProps(diff, assignSelf=true) {
@@ -240,22 +226,28 @@ export class PlayerAnt extends Ant {
 	}
 	
 	onTick({dt, engine}) {
-		if (engine.keyStates.KeyA || engine.keyStates.ArrowLeft) {
+		if (engine.getKey('KeyT')) {
+			this.setNetProps({speech: ''});
+			this.speechBox.disabled = false;
+			this.speechBox.focus({preventScroll: true});
+		}
+		
+		if (engine.getKey('KeyA') || engine.getKey('ArrowLeft')) {
 			this.setNetProps({
 				rot: this.rot - this.angSpeed,
 			});
 		}
-		if (engine.keyStates.KeyD || engine.keyStates.ArrowRight) {
+		if (engine.getKey('KeyD') || engine.getKey('ArrowRight')) {
 			this.setNetProps({
 				rot: this.rot + this.angSpeed,
 			});
 		}
 		
 		let walk = 0;
-		if (engine.keyStates.KeyW || engine.keyStates.ArrowUp) {
+		if (engine.getKey('KeyW') || engine.getKey('ArrowUp')) {
 			walk += 1;
 		}
-		if (engine.keyStates.KeyS || engine.keyStates.ArrowDown) {
+		if (engine.getKey('KeyS') || engine.getKey('ArrowDown')) {
 			walk -= 1;
 		}
 		

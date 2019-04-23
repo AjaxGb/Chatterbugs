@@ -73,18 +73,17 @@ export default class Engine {
 		this.onRender = this.onRender.bind(this);
 		
 		this.cameraPos = Vec2.zero;
-
+		
+		this.lastRealMillis = 0;
+		this.realMillis = 0;
 		this.seconds = 0;
 		this.frame = -1;
 		
 		this.timeCallbacks = [];
 		this.conditionCallbacks = [];
-		this.keyCallbacks = {
-			down:  {},
-			up:    {},
-		};
-		this.keyStates = {};
 		
+		this.keyStates = {};
+		this.ignoreInput = false;
 		const preventKeys = {
 			'ArrowDown': {},
 			'ArrowLeft': {},
@@ -97,48 +96,54 @@ export default class Engine {
 		};
 		
 		const keyHandler = e => {
-			const tagName = e.target.tagName;
-			if (tagName === 'INPUT' || tagName === 'TEXTAREA') {
-				return;
-			}
-			
-			if (preventKeys[e.code]) {
+			if (!this.ignoringInput && preventKeys[e.code]) {
 				// TODO: Finer control, if needed
 				e.preventDefault();
 				e.stopPropagation();
 			}
 			
+			const state = this.keyStates[e.code] || (this.keyStates[e.code] = {});
+			
 			if (e.type === 'keydown') {
-				if (this.keyStates[e.code] === true) return;
-				this.keyStates[e.code] = true;
+				if (state.down === true) return;
+				state.down = true;
+				state.changeTime = performance.now();
 			} else if (e.type === 'keyup') {
-				if (this.keyStates[e.code] === false) return;
-				this.keyStates[e.code] = false;
+				if (state.down === false) return;
+				state.down = false;
+				state.changeTime = performance.now();
 			} else {
 				return;
-			}
-			
-			const action = e.type.substr(3);
-			const callbacks = this.keyCallbacks[action][e.code];
-			if (!callbacks) return;
-			
-			removeWhere(callbacks, c => {
-				if (c.ctrl != null && c.ctrl != e.ctrlKey)
-					return false;
-				if (c.shift != null && c.shift != e.shiftKey)
-					return false;
-				if (c.alt != null && c.alt != e.altKey)
-					return false;
-				c.callback();
-				return true;
-			});
-			
-			if (callbacks.length === 0) {
-				delete this.keyCallbacks[action][e.code];
 			}
 		};
 		window.addEventListener('keydown', keyHandler);
 		window.addEventListener('keyup',   keyHandler);
+	}
+	
+	get ignoringInput() {
+		const activeTag = document.activeElement.tagName;
+		return this.ignoreInput || activeTag === 'INPUT' || activeTag === 'TEXTAREA';
+	}
+	
+	getKey(code) {
+		if (this.ignoringInput) return false;
+		const state = this.keyStates[code];
+		if (!state) return false;
+		return state.down;
+	}
+	
+	getKeyPushed(code) {
+		if (this.ignoringInput) return false;
+		const state = this.keyStates[code];
+		if (!state) return false;
+		return state.down && state.changeTime > this.lastRealMillis;
+	}
+	
+	getKeyReleased(code) {
+		if (this.ignoringInput) return false;
+		const state = this.keyStates[code];
+		if (!state) return false;
+		return !state.down && state.changeTime > this.lastRealMillis;
 	}
 	
 	get width() {
@@ -295,17 +300,6 @@ export default class Engine {
 		});
 	}
 	
-	afterKey(action, key,
-			ctrl=undefined, shift=undefined, alt=undefined) {
-		return new Promise(resolve => {
-			const actionMap = this.keyCallbacks[action];
-			(actionMap[key] || (actionMap[key] = [])).push({
-				callback: resolve,
-				ctrl, shift, alt,
-			});
-		});
-	}
-	
 	addEntityFromData(id, data) {
 		return this.addEntity(
 			this.entityTypes.createEntity(
@@ -335,6 +329,7 @@ export default class Engine {
 	onRender(realMillis) {
 		this.delta = Math.min(0.1,
 			(realMillis - this.realMillis) / 1000);
+		this.lastRealMillis = this.realMillis;
 		this.realMillis = realMillis;
 		
 		this.seconds += this.delta;
