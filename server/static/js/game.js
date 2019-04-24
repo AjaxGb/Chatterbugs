@@ -5,6 +5,7 @@ import Ant from './ant.js';
 import Box from './box.js';
 import Plant from './plant.js';
 import Word from './word.js';
+import TerrBlock from './terrblock.js';
 
 const faceInput = document.getElementById('face-input');
 const connectForm = document.getElementById('connect');
@@ -34,6 +35,7 @@ async function runGame() {
 		.register(Box)
 		.register(Plant)
 		.register(Word)
+		.register(TerrBlock)
 		;
 	
 	const engine = window.engine = new Engine(

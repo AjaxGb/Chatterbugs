@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from server.entity import Point
 from server.ant import Ant
 from server.plant import Plant
+from server.terrblock import TerrBlock
 import server.packets_json as packets
 from rtree import index as rtree
 import random
@@ -72,6 +73,7 @@ class ChatterWorld:
 		self.static_rtree = rtree.Index()
 		self.markov = MarkovSource()
 		self.markov.load("server\sourcetext\AliceInWonderland.txt")
+		self.add_terrain()
 	
 	def add_client(self, client):
 		if (client.world):
@@ -161,6 +163,12 @@ class ChatterWorld:
 			entity.temp_seen_by.clear()
 			
 			entity.diff.clear()
+	
+	def add_terrain(self):
+		for i in range(0, 30):
+			scale = random.random()*120 + 60
+			t = TerrBlock(Point((random.random()-0.5)*1000, (random.random()-0.5)*5000), Point(scale, scale), random.random()*360)
+			self.add_entity(t)
 	
 	def _tick(self):
 		# Plants
