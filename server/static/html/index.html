@@ -24,16 +24,20 @@
 	</style>
 </head>
 <body>
-	<input id="face-input" maxlength="5" minlength="5" required type="text">
-	<input id="connect" type="button" value="Connect">
-	<label>
-		Bells:
-		<select id="bells" value="Pentatonic">
-			<option value="">None</option>
-			<option value="Pentatonic">Pentatonic</option>
-			<option value="TwelveTone">Twelve Tone</option>
-		</select>
-	</label>
+	<p>
+		<label>
+			Bells:
+			<select id="bells" value="Pentatonic">
+				<option value="">None</option>
+				<option value="Pentatonic">Pentatonic</option>
+				<option value="TwelveTone">Twelve Tone</option>
+			</select>
+		</label>
+		<form id="connect" onsubmit="return false">
+			<input id="face-input" maxlength="5" minlength="5" autofocus required type="text">
+			<input type="submit" value="Connect">
+		</form>
+	</p>
 	<canvas id="main-canvas" width="1200" height="600"></canvas>
 </body>
 </html>

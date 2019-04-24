@@ -7,19 +7,17 @@ import Plant from './plant.js';
 import Word from './word.js';
 
 const faceInput = document.getElementById('face-input');
-const connectButton = document.getElementById('connect');
+const connectForm = document.getElementById('connect');
 window.bellSelect = document.getElementById('bells');
 
 const wsConnectUrl = new URL('connect', location);
 wsConnectUrl.protocol = 'ws:';
 
-connectButton.addEventListener('click', runGame);
+connectForm.addEventListener('submit', runGame, {once: true});
 
 async function runGame() {
 	const playerFace = faceInput.value;
-	connectButton.removeEventListener('click', runGame);
-	connectButton.disabled = true;
-	faceInput.disabled = true;
+	connectForm.remove();
 	
 	if (playerFace.length !== 5) {
 		alert('Face must be 5 characters long!');
