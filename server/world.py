@@ -167,7 +167,7 @@ class ChatterWorld:
 	def add_terrain(self):
 		for i in range(0, 30):
 			scale = random.random()*120 + 60
-			t = TerrBlock(Point((random.random()-0.5)*1000, (random.random()-0.5)*5000), Point(scale, scale), random.random()*360)
+			t = TerrBlock(Point((random.random()-0.5)*1000, (random.random()-0.5)*1000), Point(scale, scale), random.random()*360)
 			self.add_entity(t)
 	
 	def _tick(self):
