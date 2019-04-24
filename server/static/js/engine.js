@@ -322,10 +322,6 @@ export default class Engine {
 		}
 	}
 	
-	getNetEntity(category, id) {
-		return this.byNetID[category].get(id);
-	}
-	
 	onRender(realMillis) {
 		this.delta = Math.min(0.1,
 			(realMillis - this.realMillis) / 1000);
