@@ -876,7 +876,7 @@ export class PlayerAnt extends Ant {
 				const rightPos = entity.pos.add(Vec2.fromAngle(entity.rot, halfWidth));
 				const nearPos = nearestPointOnSegment(this.pos, leftPos, rightPos);
 				const squareDistance = Vec2.squareDistance(nearPos, this.pos);
-				if (squareDistance < 100 && squareDistance < targSqDist) {
+				if (squareDistance < 30**2 && squareDistance < targSqDist) {
 					target = entity;
 					targSqDist = squareDistance;
 				}
