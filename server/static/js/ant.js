@@ -116,8 +116,8 @@ export default class Ant extends Entity {
 		this.speechCtx.textBaseline = 'middle';
 		
 		this.transits = [];
-		this.transitSpeedIn = 1//10;
-		this.transitSpeedOut = 1//15;
+		this.transitSpeedIn = 10;
+		this.transitSpeedOut = 15;
 	}
 	
 	onStart({engine}) {
