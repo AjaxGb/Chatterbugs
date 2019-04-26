@@ -15,6 +15,8 @@ class Plant(EntityBase):
     def branch(self):
         if self.world != None:
             if len(self.words) == 0:
+                if self.text == '':
+                    self.text = self.world.markov.chain(self.text, self.text)
                 length = (len(self.text)+1)*5
                 angle = super().rot-math.pi/2
                 x, y = super().pos
@@ -41,23 +43,24 @@ class Word(EntityBase):
         self.text = text
         self.parent_plant = parent_plant
         self.branches = []
+        self.alive = parent_plant != None
 
     def branch(self):
         # 2 branch limit for trees.
-        if len(self.branches) < 2:
+        if len(self.branches) < 2 and self.alive:
             # First, calculate offset based on current word
             x, y = super().pos
             x = x+math.cos(super().rot)*(len(self.text)+1)*5
             y = y+math.sin(super().rot)*(len(self.text)+1)*5
             # next, calculate offset based on future word.
-            next_word = self.world.markov.chain(self.text, self.parent_word) # Markov goes here!
+            next_word = self.world.markov.chain(self.text, self.parent_word)
 
             # This should be tree-only code.
             new_angle = 0
             if len(self.branches) == 1:
-                new_angle = super().rot + (super().rot - self.branches[0].rot)*5*random.random()
+                new_angle = super().rot + (super().rot - self.branches[0].rot)*7*random.random()
             else:
-                new_angle = super().rot + (random.random()-0.5)*0.5
+                new_angle = super().rot + (random.random()-0.5)*0.8
             if abs(new_angle - self.parent_plant.rot - math.pi/2) > math.pi/3:
                 new_angle = (new_angle*2+self.parent_plant.rot-math.pi/2)/3
             
@@ -66,13 +69,14 @@ class Word(EntityBase):
                 if abs(b.rot - new_angle) < 0.3 or next_word == b.text:
                     good = False
             if good:
-                w = Word((x+math.cos(new_angle)*(len(next_word)+1)*5, y+math.sin(new_angle)*(len(next_word)+1)*5), new_angle, next_word)
-                w.parent_plant = self.parent_plant
+                w = Word((x+math.cos(new_angle)*(len(next_word)+1)*5, y+math.sin(new_angle)*(len(next_word)+1)*5), new_angle, next_word, self.parent_plant)
                 self.branches.append(w)
                 self.parent_plant.words.append(w)
                 self.world.add_entity(w)
-        def destroy(self):
+        def kill(self):
+            self.alive = False
             for b in self.branches:
+                b.alive = False
                 self.parent_plant.words.remove(b)
     text = dataprop('text')
     branches = []
