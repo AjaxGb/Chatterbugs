@@ -65,7 +65,6 @@ class Ant(EntityBase):
 			speech = self.data['speech']
 			if speech[-1] == '\0':
 				self.data['speech'] = speech[:speech.rfind('\0', 0, -1)]
-				print(self.data['speech'])
 			else:
 				self.data['speech'] = speech[:-1]
 				if speech[-1] != ' ':
