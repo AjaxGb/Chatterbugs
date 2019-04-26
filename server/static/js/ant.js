@@ -258,7 +258,7 @@ export default class Ant extends Entity {
 	}
 	
 	skipTransits() {
-		for (const tran of this.transits.length) {
+		for (const tran of this.transits) {
 			if (tran.inbound) {
 				const gutInfo = this.gut[tran.char];
 				gutInfo.fixed++;
