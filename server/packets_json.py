@@ -31,6 +31,7 @@ for name in [
 	'C_UpdateSelf',
 	'C_MakeBox',
 	'C_MakePlant',
+	'C_Destroy',
 	]:
 	packet = PacketType(name)
 	types[name] = packet

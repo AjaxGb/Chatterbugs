@@ -52,6 +52,14 @@ export default class Vec2 {
 			lerpAngle(a.toAngle(), b.toAngle(), t),
 			lerp(a.magnitude, b.magnitude, t));
 	}
+
+	static squareDistance(a, b) {
+		return (a.x - b.x)**2 + (a.y - b.y)**2;
+	}
+
+	static distance(a, b) {
+		return Math.sqrt(Vec2.squareDistance(a, b));
+	}
 	
 	scaled(scale) {
 		return new Vec2(this.x * scale, this.y * scale);

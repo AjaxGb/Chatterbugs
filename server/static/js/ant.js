@@ -1,6 +1,7 @@
 import Vec2 from './vec2.js';
 import Entity from './entity.js';
 import Packets from './packets-json.js';
+import Word from './word.js';
 import { TAU, PI_2, lerpAngle, normalizeAngle, peek, removeItem } from './utils.js';
 
 const antNetNorms = {
@@ -825,6 +826,28 @@ export class PlayerAnt extends Ant {
 			this.setNetProps({
 				pos: Vec2.add(this.pos, movement),
 			});
+		}
+
+		if (engine.getKey('Backspace') || engine.getKey('KeyE')) {
+			let target = null;
+			let targSqDist = Infinity;
+			for (const entity of engine.entities.values()) {
+				if (entity.isDead || entity.disabled || !(entity instanceof Word)) continue;
+				const squareDistance = Vec2.squareDistance(entity.pos, this.pos);
+				if (squareDistance < 100 && squareDistance < targSqDist) {
+					target = entity;
+					targSqDist = squareDistance;
+				}
+			}
+			if(target) {
+				engine.socket.send(Packets.C_Destroy.unparse({id: target.id}));
+				target.disabled = true;
+				for (let i = target.text.length-1; i >= 0; i--) {
+					const charX = i * charWidth - (target.text.length*charWidth)/2 + charSubWidth / 2;
+					const charPos = Vec2.fromAngle(target.rot, charX).add(target.pos);
+					this.eatChar(target.text[i], charPos.sub(this.pos), target.rot);
+				}
+			}
 		}
 		
 		this.secsSinceNet += dt;

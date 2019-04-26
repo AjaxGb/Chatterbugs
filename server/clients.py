@@ -65,6 +65,9 @@ class WSClient:
 				elif p.ptype == packets.C_MakePlant:
 					plant = Plant(p.pos, p.rot, p.text)
 					self.world.add_entity(plant)
+				elif p.ptype == packets.C_Destroy:
+					self.log(p.id)
+					self.world.remove_entity(self.world.entities.get(p.id))
 				else:
 					self.log('UNEXPECTED PACKET:', p)
 		except BaseException as e:
