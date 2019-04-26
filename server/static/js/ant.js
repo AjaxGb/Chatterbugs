@@ -2,7 +2,7 @@ import Vec2 from './vec2.js';
 import Entity from './entity.js';
 import Packets from './packets-json.js';
 import Word from './word.js';
-import { TAU, PI_2, lerpAngle, normalizeAngle, peek, removeItem } from './utils.js';
+import { TAU, PI_2, lerpAngle, normalizeAngle, nearestPointOnSegment, peek, removeItem } from './utils.js';
 
 const antNetNorms = {
 	pos: Vec2.fromIter,
@@ -871,13 +871,17 @@ export class PlayerAnt extends Ant {
 			let targSqDist = Infinity;
 			for (const entity of engine.entities.values()) {
 				if (entity.isDead || entity.disabled || !(entity instanceof Word)) continue;
-				const squareDistance = Vec2.squareDistance(entity.pos, this.pos);
+				const halfWidth = entity.text.length * charWidth / 2;
+				const leftPos = entity.pos.add(Vec2.fromAngle(entity.rot, -halfWidth));
+				const rightPos = entity.pos.add(Vec2.fromAngle(entity.rot, halfWidth));
+				const nearPos = nearestPointOnSegment(this.pos, leftPos, rightPos);
+				const squareDistance = Vec2.squareDistance(nearPos, this.pos);
 				if (squareDistance < 100 && squareDistance < targSqDist) {
 					target = entity;
 					targSqDist = squareDistance;
 				}
 			}
-			if(target) {
+			if (target) {
 				engine.socket.send(Packets.C_Destroy.unparse({id: target.id}));
 				target.disabled = true;
 				for (let i = target.text.length-1; i >= 0; i--) {

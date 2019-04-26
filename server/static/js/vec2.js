@@ -42,12 +42,16 @@ export default class Vec2 {
 	}
 	
 	static lerpPosition(a, b, t) {
+		if (t === 0) return a;
+		if (t === 1) return b;
 		return new Vec2(
 			lerp(a.x, b.x, t),
 			lerp(a.y, b.y, t));
 	}
 	
 	static lerpDirection(a, b, t) {
+		if (t === 0) return a;
+		if (t === 1) return b;
 		return Vec2.fromAngle(
 			lerpAngle(a.toAngle(), b.toAngle(), t),
 			lerp(a.magnitude, b.magnitude, t));
