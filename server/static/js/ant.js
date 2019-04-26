@@ -258,7 +258,43 @@ export default class Ant extends Entity {
 	}
 	
 	skipTransits() {
-		// TODO
+		for (const tran of this.transits.length) {
+			if (tran.inbound) {
+				const gutInfo = this.gut[tran.char];
+				gutInfo.fixed++;
+				removeItem(gutInfo.inbound, tran);
+				if (tran.speechPart) {
+					removeItem(this.speechParts, tran.speechPart);
+				}
+				this.gutDirty = true;
+			} else {
+				const speechIdx = this.speechParts.indexOf(tran.speechPart);
+				if (speechIdx < 0) throw new Error('Letter reached speech box with invalid target');
+				const prevSpeech = this.speechParts[speechIdx - 1];
+				const nextSpeech = this.speechParts[speechIdx + 1];
+				if (prevSpeech && prevSpeech.type === 'plain') {
+					// Merge with previous
+					prevSpeech.text += tran.char;
+					prevSpeech.image = null;
+					if (nextSpeech && nextSpeech.type === 'plain') {
+						prevSpeech.text += nextSpeech.text;
+						this.speechParts.splice(speechIdx, 2);
+					} else {
+						this.speechParts.splice(speechIdx, 1);
+					}
+				} else if (nextSpeech && nextSpeech.type === 'plain') {
+					// Merge with next
+					nextSpeech.text = tran.char + nextSpeech.text;
+					nextSpeech.image = null;
+					this.speechParts.splice(speechIdx, 1);
+				} else {
+					// Nothing to merge with, become solo plain speech
+					tran.speechPart.type = 'plain';
+					tran.speechPart.text = tran.char;
+					delete tran.speechPart.transit;
+				}
+			}
+		}
 	}
 	
 	ensureGutInfo(char) {
@@ -476,15 +512,14 @@ export default class Ant extends Entity {
 	}
 	
 	destroySpeech() {
+		this.skipTransits();
 		if (!this.speechParts) return false;
 		this.speechParts = null;
 		return true;
 	}
 	
 	onTick({dt}) {
-		for (let i = this.transits.length - 1; i >= 0; i--) {
-			const tran = this.transits[i];
-			
+		this.transits = this.transits.filter(tran => {
 			if (tran.inbound) {
 				tran.t += dt * this.transitSpeedIn;
 				if (tran.t >= this.segments.length + 1) {
@@ -496,7 +531,7 @@ export default class Ant extends Entity {
 						removeItem(this.speechParts, tran.speechPart);
 					}
 					this.gutDirty = true;
-					this.transits.splice(i, 1);
+					return false;
 				}
 			} else {
 				tran.t -= dt * this.transitSpeedOut;
@@ -527,10 +562,11 @@ export default class Ant extends Entity {
 						tran.speechPart.text = tran.char;
 						delete tran.speechPart.transit;
 					}
-					this.transits.splice(i, 1);
+					return false;
 				}
 			}
-		}
+			return true;
+		});
 	}
 	
 	onDraw({engine, ctx, seconds}) {
