@@ -766,6 +766,7 @@ export class PlayerAnt extends Ant {
 							rot: this.rot,
 							text: text,
 						}));
+					this.destroySpeech();
 				}
 			} else if (speech.startsWith('\0PLANT:\0')) {
 				const text = speech.substr(8).trim();
@@ -778,12 +779,12 @@ export class PlayerAnt extends Ant {
 							rot: this.rot,
 							text: text,
 						}));
+					this.destroySpeech();
 				}
 			} else {
 				this.unspeakAll();
 			}
 			
-			this.destroySpeech();
 			engine.inputTarget = null;
 			
 			event.preventDefault();
