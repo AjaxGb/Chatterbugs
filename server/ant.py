@@ -38,7 +38,6 @@ class Ant(EntityBase):
 		
 		self.speech = None
 		self.gut = CounterNetProp(self, 'gut')
-		self.gut['a'] = 5
 	
 	speech = dataprop('speech')
 	bell_type = dataprop('bellType')

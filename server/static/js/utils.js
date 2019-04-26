@@ -1,3 +1,4 @@
+import Vec2 from './vec2.js';
 
 export const TAU  = 6.283185307179586477;
 export const PI_2 = 1.570796326794896619;
@@ -40,6 +41,10 @@ export function randomAngle() {
 
 export function clamped(n, min, max) {
 	return Math.min(Math.max(n, min), max);
+}
+
+export function clamped01(n) {
+	return Math.min(Math.max(n, 0), 1);
 }
 
 export function clampedAbs(n, max) {
@@ -101,14 +106,10 @@ export function defineConsts(obj, props) {
 	}
 }
 
-export function weightTowardsCenter(p, damping=5) {
-	return Math.sin(TAU * p) / (TAU + damping) + p;
-}
-
-export function mergeNormalizer(name) {
-	return function(diff) {
-		for (const key in diff) {
-			this[name][key] = diff;
-		}
-	}
+export function nearestPointOnSegment(p, v, w) {
+ 	const sqrLength = Vec2.squareDistance(v, w);
+	if (sqrLength < 0.001) return Vec2.squareDistance(p, v);
+	const t = clamped01(
+		((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / sqrLength);
+	return Vec2.lerpPosition(v, w, t);
 }
