@@ -53,6 +53,12 @@ export class DieEvent extends EngineEvent {
 	}
 }
 
+export class InputEvent extends EngineEvent {
+	constructor(engine, event) {
+		super('input', engine, {event});
+	}
+}
+
 export default class Engine {
 	
 	constructor(canvas, socket, entityTypes) {
@@ -84,6 +90,7 @@ export default class Engine {
 		
 		this.keyStates = {};
 		this.ignoreInput = false;
+		this.inputTarget = null;
 		const preventKeys = {
 			'ArrowDown': {},
 			'ArrowLeft': {},
@@ -96,6 +103,10 @@ export default class Engine {
 		};
 		
 		const keyHandler = e => {
+			if (!this.ignoreInput && this.inputTarget) {
+				this.inputTarget.dispatchEvent(new InputEvent(this, e));
+			}
+			
 			if (!this.ignoringInput && preventKeys[e.code]) {
 				// TODO: Finer control, if needed
 				e.preventDefault();
@@ -122,7 +133,10 @@ export default class Engine {
 	
 	get ignoringInput() {
 		const activeTag = document.activeElement.tagName;
-		return this.ignoreInput || activeTag === 'INPUT' || activeTag === 'TEXTAREA';
+		return this.ignoreInput
+			|| this.inputTarget
+			|| activeTag === 'INPUT'
+			|| activeTag === 'TEXTAREA';
 	}
 	
 	getKey(code) {
