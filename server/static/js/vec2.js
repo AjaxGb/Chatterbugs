@@ -98,6 +98,10 @@ export default class Vec2 {
 		return new Vec2(this.x + vec.x, this.y + vec.y);
 	}
 	
+	addXY(x=0, y=0) {
+		return new Vec2(this.x + x, this.y + y);
+	}
+	
 	static add(...vecs) {
 		if (vecs.length === 0) {
 			throw 'Vec2.add(...) cannot be called with 0 arguments';

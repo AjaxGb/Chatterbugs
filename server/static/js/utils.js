@@ -74,6 +74,13 @@ export function removeWhere(arr, cond) {
 	}
 }
 
+export function removeItem(arr, item) {
+	const i = arr.indexOf(item);
+	if (i < 0) return false;
+	arr.splice(i, 1);
+	return true;
+}
+
 export function waitMillis(ms) {
 	return new Promise(resolve => {
 		setTimeout(resolve, ms);
@@ -95,4 +102,12 @@ export function defineConsts(obj, props) {
 
 export function weightTowardsCenter(p, damping=5) {
 	return Math.sin(TAU * p) / (TAU + damping) + p;
+}
+
+export function mergeNormalizer(name) {
+	return function(diff) {
+		for (const key in diff) {
+			this[name][key] = diff;
+		}
+	}
 }
