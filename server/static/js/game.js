@@ -9,7 +9,6 @@ import TerrBlock from './terrblock.js';
 
 const faceInput = document.getElementById('face-input');
 const connectForm = document.getElementById('connect');
-window.bellSelect = document.getElementById('bells');
 
 const wsConnectUrl = new URL('connect', location);
 wsConnectUrl.protocol = 'ws:';

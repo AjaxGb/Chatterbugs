@@ -100,6 +100,8 @@ export default class Engine {
 			'KeyA': {},
 			'KeyS': {},
 			'KeyD': {},
+			'Space': {},
+			'Backspace': {},
 		};
 		
 		const keyHandler = e => {

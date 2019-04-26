@@ -1,8 +1,9 @@
 
-const pentatonic = [110, 123.471, 138.591, 164.814, 184.997, 220, 246.942, 277.182, 329.628, 369.994, 440];
-const twelvetone = [110, 116.541, 123.471, 130.813, 138.591, 146.832, 155.563, 164.814, 174.614, 184.997, 195.997, 207.652,
-					220, 233.082, 246.942, 261.626, 277.182, 293.665, 311.127, 329.628, 349.228, 369.994, 391.995, 415.305,
-					440];
+const bells = {
+	pentatonic: [110, 123.471, 138.591, 164.814, 184.997, 220, 246.942, 277.182, 329.628, 369.994, 440],
+	twelvetone: [110, 116.541, 123.471, 130.813, 138.591, 146.832, 155.563, 164.814, 174.614, 184.997, 195.997, 207.652,
+		220, 233.082, 246.942, 261.626, 277.182, 293.665, 311.127, 329.628, 349.228, 369.994, 391.995, 415.305, 440],
+};
 
 export default class GameAudio {
 	constructor() {
@@ -22,12 +23,13 @@ export default class GameAudio {
 		this.bellConstLowpass.connect(this.ac.destination);
 	}
 	
-	playPentatonicBell(index, dur) {
-		this.playBell(pentatonic[index % pentatonic.length], dur);
-	}
-	
-	playTwelveToneBell(index, dur) {
-		this.playBell(twelvetone[index % twelvetone.length], dur);
+	playBellType(type, index, dur) {
+		const tones = bells[type];
+		if (!tones) {
+			console.error('Invalid bell tone type:', type);
+		} else {
+			this.playBell(tones[index % tones.length], dur);
+		}
 	}
 	
 	playBell(freq, dur) {

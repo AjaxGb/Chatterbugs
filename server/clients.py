@@ -48,6 +48,17 @@ class WSClient:
 						self.entity.rot = p.rot
 					if hasattr(p, 'speech'):
 						self.entity.speech = p.speech
+					if hasattr(p, 'bellType'):
+						self.entity.bell_type = p.bellType
+					if hasattr(p, 'gut'):
+						for char, count in p.gut.items():
+							self.entity.gut[char] = count
+					if hasattr(p, 'textActs'):
+						for act in p.textActs:
+							try:
+								self.entity.add_text_act(act)
+							except Exception as e:
+								self.log('Failed to load text act', act, e)
 				elif p.ptype == packets.C_MakeBox:
 					box = Box(p.pos, p.rot, p.text)
 					self.world.add_entity(box)
