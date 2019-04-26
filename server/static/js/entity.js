@@ -42,15 +42,29 @@ export default class Entity extends GameEventTarget {
 		});
 		
 		if (this.netLerps && !this.noInterpolation) {
+			// Use lerping
 			
-			const lerpDiff = loadDiff(this,
-				this, data, this.netNormalizers,
-				{}, this.netLerps);
+			const lerpInit = {};
+			
+			for (const [key, norm] of Object.entries(this.netNormalizers)) {
+				let value = data[key];
+				
+				if (value !== undefined && norm) value = norm.call(this, value);
+				if (value === undefined) continue;
+				
+				if (this.netLerps[key]) {
+					lerpInit[key] = value;
+				} else if (this.netAppliers && this.netAppliers[key]) {
+					this.netAppliers[key].call(this, this, value, key);
+				} else {
+					this[key] = value;
+				}
+			}
 			
 			this.lerpSnapshots = [
 				{
 					millis: null,
-					lerped: lerpDiff,
+					lerped: lerpInit,
 					other: null,
 				}
 			];
@@ -75,7 +89,19 @@ export default class Entity extends GameEventTarget {
 			this.on('diff', interpolateOnDiff);
 			this.on('tick', interpolateOnTick);
 		} else {
-			loadDiff(this, this, data, this.netNormalizers);
+			// Do not use lerping
+			for (const [key, norm] of Object.entries(this.netNormalizers)) {
+				let value = data[key];
+				
+				if (value !== undefined && norm) value = norm.call(this, value);
+				if (value === undefined) continue;
+				
+				if (this.netAppliers && this.netAppliers[key]) {
+					this.netAppliers[key].call(this, this, value, key);
+				} else {
+					this[key] = value;
+				}
+			}
 			this.on('diff', noInterpolateOnDiff);
 		}
 		
@@ -84,6 +110,7 @@ export default class Entity extends GameEventTarget {
 		
 		if (this.onStart) this.on('start', this.onStart, true);
 		if (this.onTick) this.on('tick', this.onTick);
+		if (this.onInput) this.on('input', this.onInput);
 		if (this.onDraw) this.on('draw', this.onDraw);
 		if (this.onDie) this.on('die', this.onDie);
 	}
@@ -102,29 +129,19 @@ export default class Entity extends GameEventTarget {
 	}
 }
 
-function loadDiff(entity, obj, diff, normalizers,
-		lerpBase=undefined, lerps=undefined) {
-	
-	const lerpObj = Object.assign({}, lerpBase);
-	
-	for (const [key, norm] of Object.entries(normalizers)) {
+function noInterpolateOnDiff({diff}) {
+	for (const [key, norm] of Object.entries(this.netNormalizers)) {
 		let value = diff[key];
 		
-		if (value !== undefined && norm) value = norm.call(entity, value);
+		if (value !== undefined && norm) value = norm.call(this, value);
 		if (value === undefined) continue;
 		
-		if (lerps && lerps[key]) {
-			lerpObj[key] = value;
+		if (this.netAppliers && this.netAppliers[key]) {
+			this.netAppliers[key].call(this, this, value, key);
 		} else {
-			obj[key] = value;
+			this[key] = value;
 		}
 	}
-	
-	return lerpObj;
-}
-
-function noInterpolateOnDiff({diff}) {
-	loadDiff(this, this, diff, this.netNormalizers);
 }
 
 function netLerp(entity, key) {
@@ -152,18 +169,36 @@ function interpolateOnStart({realMillis: millis}) {
 
 function interpolateOnDiff({diff, realMillis: millis}) {
 	const lastSnap = peek(this.lerpSnapshots);
+	
 	const otherDiff = {};
-	const lerpDiff = loadDiff(this,
-		otherDiff, diff, this.netNormalizers,
-		lastSnap.lerped, this.netLerps);
+	const lerpDiff = Object.assign({}, lastSnap.lerped);
+	
+	for (const [key, norm] of Object.entries(this.netNormalizers)) {
+		let value = diff[key];
+		
+		if (value !== undefined && norm) value = norm.call(this, value);
+		if (value === undefined) continue;
+		
+		if (this.netLerps[key]) {
+			lerpDiff[key] = value;
+		} else {
+			otherDiff[key] = value;
+		}
+	}
 	
 	if (lastSnap.millis === millis) {
 		lastSnap.lerped = lerpDiff;
-		Object.assign(
-			(this.lerpSnapshots.length === 1)
-				? this
-				: lastSnap.other,
-			otherDiff);
+		if (this.lerpSnapshots.length === 1) {
+			for (const [key, value] of Object.entries(otherDiff)) {
+				if (this.netAppliers && this.netAppliers[key]) {
+					this.netAppliers[key].call(this, this, value, key);
+				} else {
+					this[key] = value;
+				}
+			}
+		} else {
+			Object.assign(lastSnap, otherDiff);
+		}
 	} else {
 		this.lerpSnapshots.push({
 			millis,
@@ -208,7 +243,13 @@ function interpolateOnTick({dt, realMillis}) {
 	while (snapshots.length > 2
 			&& this.displayedMillis > snapshots[1].millis) {
 		snapshots.shift();
-		Object.assign(this, snapshots[0].other);
+		for (const [key, value] of Object.entries(snapshots[0].other)) {
+			if (this.netAppliers && this.netAppliers[key]) {
+				this.netAppliers[key].call(this, this, value, key);
+			} else {
+				this[key] = value;
+			}
+		}
 		snapshots[0].other = null;
 	}
 	
