@@ -1,5 +1,6 @@
 
-export const TAU = 6.283185307179586477;
+export const TAU  = 6.283185307179586477;
+export const PI_2 = 1.570796326794896619;
 
 export function drawSprite(ctx, img, x, y, rot=0, offx=0, offy=0) {
 	if (rot) {
