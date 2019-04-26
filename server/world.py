@@ -116,6 +116,7 @@ class ChatterWorld:
 			return False
 		else:
 			del self.entities[entity.id]
+			entity.on_removed()
 			return True
 	
 	def broadcast(self, packet, ignore=None):

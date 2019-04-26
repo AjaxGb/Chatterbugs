@@ -38,12 +38,28 @@ class Plant(EntityBase):
 class Word(EntityBase):
     type_id = 'word'
     
-    def __init__(self, pos, angle=0, text='word', parent_plant=None):
+    def __init__(self, pos, angle=0, text='word', parent_plant=None, parent_branch=None):
         super().__init__(pos, angle)
         self.text = text
         self.parent_plant = parent_plant
+        self.parent_branch = parent_branch
         self.branches = []
         self.alive = parent_plant != None
+
+    def kill(self):
+        self.alive = False
+        if self.parent_plant != None:
+            self.parent_plant = None
+        for b in self.branches:
+            b.kill()
+    
+    def on_removed(self):
+        super().on_removed()
+        if(self.parent_plant != None):
+            self.parent_plant.words.remove(self)
+        if(self.parent_branch != None):
+            self.parent_branch.branches.remove(self)
+        self.kill()
 
     def branch(self):
         # 2 branch limit for trees.
@@ -69,15 +85,10 @@ class Word(EntityBase):
                 if abs(b.rot - new_angle) < 0.3 or next_word == b.text:
                     good = False
             if good:
-                w = Word((x+math.cos(new_angle)*(len(next_word)+1)*5, y+math.sin(new_angle)*(len(next_word)+1)*5), new_angle, next_word, self.parent_plant)
+                w = Word((x+math.cos(new_angle)*(len(next_word)+1)*5, y+math.sin(new_angle)*(len(next_word)+1)*5), new_angle, next_word, self.parent_plant, self)
                 self.branches.append(w)
                 self.parent_plant.words.append(w)
                 self.world.add_entity(w)
-        def kill(self):
-            self.alive = False
-            for b in self.branches:
-                b.alive = False
-                self.parent_plant.words.remove(b)
     text = dataprop('text')
     branches = []
     parent_plant = None

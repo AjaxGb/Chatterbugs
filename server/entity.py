@@ -60,3 +60,6 @@ class EntityBase:
 		x, y = self.pos
 		r = self.radius
 		return (x - r, y - r, x + r, y + r)
+	
+	def on_removed(self):
+		self.world = None
