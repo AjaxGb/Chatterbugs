@@ -758,7 +758,7 @@ export class PlayerAnt extends Ant {
 	
 	eatChar(char, pos=Vec2.zero, rot=0) {
 		super.eatChar(char, pos, rot);
-		this.addTextAct({type: 'eat', pos, rot});
+		this.addTextAct({type: 'eat', char, pos, rot});
 	}
 	
 	speakChar(char) {
