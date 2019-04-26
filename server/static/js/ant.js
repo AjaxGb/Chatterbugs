@@ -693,7 +693,7 @@ export class PlayerAnt extends Ant {
 	}
 	
 	onInput({seconds, event}) {
-		if (event.type !== 'keydown' || !this.speechParts || e.altKey) return;
+		if (event.type !== 'keydown' || !this.speechParts || event.altKey) return;
 		
 		if (event.code === 'Escape') {
 			this.unspeakAll();
@@ -745,7 +745,7 @@ export class PlayerAnt extends Ant {
 			
 			event.preventDefault();
 		} else {
-			if (e.ctrlKey) return;
+			if (event.ctrlKey) return;
 			
 			if (untrackedChars.includes(event.key)
 				? this.speakUntracked(event.key)
