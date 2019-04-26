@@ -866,7 +866,7 @@ export class PlayerAnt extends Ant {
 			});
 		}
 
-		if (engine.getKey('Backspace') || engine.getKey('KeyE')) {
+		if ((engine.getKey('Backspace') || engine.getKey('KeyE')) && !this.justAte) {
 			let target = null;
 			let targSqDist = Infinity;
 			for (const entity of engine.entities.values()) {
@@ -891,6 +891,7 @@ export class PlayerAnt extends Ant {
 				}
 			}
 		}
+		this.justAte = engine.getKey('Backspace') || engine.getKey('KeyE');
 		
 		this.secsSinceNet += dt;
 		if (this.secsSinceNet > 0.03 && this.broadcastDiff) {
