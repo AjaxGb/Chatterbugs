@@ -657,10 +657,6 @@ export default class Ant extends Entity {
 		
 		ctx.restore();
 	}
-	
-	onDie() {
-		this.speechBox.remove();
-	}
 }
 
 Ant.prototype.netNormalizers = antNetNorms;
