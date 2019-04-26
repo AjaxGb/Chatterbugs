@@ -97,6 +97,10 @@ export default class Ant extends Entity {
 		this.speed = 100;
 		this.angSpeed = 0.05;
 		
+		if (!this.gut) {
+			this.gut = {};
+			this.gutDirty = false;
+		}
 		const gutCanvas = document.createElement('canvas');
 		gutCanvas.width = gutSize * textOverscale;
 		gutCanvas.height = gutSize * textOverscale;
