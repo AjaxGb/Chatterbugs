@@ -839,8 +839,18 @@ export class PlayerAnt extends Ant {
 		super.onTick(event);
 		const {dt, engine} = event;
 		
+		const ctrlKey = engine.getKey('ControlLeft') || engine.getKey('ControlRight');
+		
 		if (engine.getKey('KeyT')) {
 			this.setNetProps({speech: ''});
+			engine.inputTarget = this;
+		} else if (engine.getKey('KeyB') && ctrlKey) {
+			this.setNetProps({speech: ''});
+			this.speakUntracked('BOX:');
+			engine.inputTarget = this;
+		} else if (engine.getKey('KeyP') && ctrlKey) {
+			this.setNetProps({speech: ''});
+			this.speakUntracked('PLANT:');
 			engine.inputTarget = this;
 		}
 		

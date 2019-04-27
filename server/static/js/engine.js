@@ -100,6 +100,9 @@ export default class Engine {
 			'KeyA': {},
 			'KeyS': {},
 			'KeyD': {},
+			'KeyB': {ctrl: true},
+			'KeyP': {ctrl: true},
+			'KeyE': {},
 			'Space': {},
 			'Backspace': {},
 		};
@@ -110,9 +113,11 @@ export default class Engine {
 			}
 			
 			if (!this.ignoringInput && preventKeys[e.code]) {
-				// TODO: Finer control, if needed
-				e.preventDefault();
-				e.stopPropagation();
+				if (!e.ctrlKey === !preventKeys[e.code].ctrl
+				 && !e.altKey  === !preventKeys[e.code].alt) {
+					e.preventDefault();
+					e.stopPropagation();
+				}
 			}
 			
 			const state = this.keyStates[e.code] || (this.keyStates[e.code] = {});
