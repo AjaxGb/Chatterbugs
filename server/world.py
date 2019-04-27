@@ -76,7 +76,7 @@ class ChatterWorld:
 		self.dynamic_rtree = None
 		self.static_rtree = rtree.Index()
 		self.markov = MarkovSource()
-		self.markov.load("server\sourcetext\AliceInWonderland.txt")
+		self.markov.load("server/sourcetext/AliceInWonderland.txt")
 		self.add_terrain()
 	
 	def add_client(self, client):
@@ -170,7 +170,7 @@ class ChatterWorld:
 			entity.diff.clear()
 	
 	def add_terrain(self):
-		for i in range(0, 30):
+		for i in range(0, 10):
 			scale = random.random()*120 + 60
 			t = TerrBlock(Point((random.random()-0.5)*1000, (random.random()-0.5)*1000), Point(scale, scale), random.random()*360)
 			self.add_entity(t)
