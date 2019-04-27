@@ -4,26 +4,24 @@
 	<title>Chatterbugs</title>
 	<script type="module" src="js/game.js"></script>
 	<style>
-		.ant-speech-box {
-			display: none;
-			position: absolute;
-			border: none;
-			outline: none;
-			resize: none;
-			font: 20px monospace;
-			background: none;
-			color: black;
-			text-align: center;
-			top: 0;
-			left: 0;
-		}
-		
-		.ant-speech-box.typing {
-			display: block;
-		}
-		
 		#face-input {
 			font-family: monospace;
+		}
+		
+		.help {
+			position: absolute;
+			top: 0;
+			right: 0;
+			padding: 10px;
+			border-radius: 3px;
+			background: rgba(255, 255, 255, 0.5);
+		}
+		
+		dl {
+			margin: 0;
+		}
+		dt {
+			font-weight: bold;
 		}
 	</style>
 </head>
@@ -49,5 +47,20 @@
 		</form>
 	</p>
 	<canvas id="main-canvas" width="1200" height="600"></canvas>
+	<div class="help">
+		<dl>
+			<dt>WASD / Arrow Keys</dt>
+			<dd>Movement</dd>
+			<dt>Ctrl+P</dt>
+			<dd>Create a plant, optionally with a seed word.</dd>
+			<dt>Ctrl+B</dt>
+			<dd>Create a box, optionally with text in it.</dd>
+			<dt>Backspace / E</dt>
+			<dd>Eat words from plants.</dd>
+			<dt>T</dt>
+			<dd>Open chat.</dd>
+		</dl>
+		You can only type symbols that you have eaten.
+	</div>
 </body>
 </html>
