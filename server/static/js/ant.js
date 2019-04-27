@@ -521,7 +521,7 @@ export default class Ant extends Entity {
 	}
 	
 	destroySpeech() {
-		this.skipTransits();
+		this.transits = this.transits.filter(t => t.inbound);
 		if (!this.speechParts) return false;
 		this.speechParts = null;
 		return true;
