@@ -21,6 +21,10 @@
 		.ant-speech-box.typing {
 			display: block;
 		}
+		
+		#face-input {
+			font-family: monospace;
+		}
 	</style>
 </head>
 <body>
@@ -34,8 +38,14 @@
 			</select>
 		</label>
 		<form id="connect" onsubmit="return false">
-			<input id="face-input" maxlength="5" minlength="5" autofocus required type="text">
-			<input type="submit" value="Connect">
+			<label>
+				Face:
+				<input id="face-input" type="text" autofocus
+					required maxlength="5" minlength="5"
+					placeholder="o<->o" 
+					autocomplete="username">
+				<input id="connect-button" type="submit" value="Connect">
+			</label>
 		</form>
 	</p>
 	<canvas id="main-canvas" width="1200" height="600"></canvas>

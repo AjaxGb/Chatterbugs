@@ -10,25 +10,51 @@ import { waitMillis } from './utils.js';
 
 const faceInput = document.getElementById('face-input');
 const connectForm = document.getElementById('connect');
+const connectButton = document.getElementById('connect-button');
 
 const wsConnectUrl = new URL('connect', location);
 wsConnectUrl.protocol = 'ws:';
 
-connectForm.addEventListener('submit', runGame, {once: true});
+connectForm.addEventListener('submit', runGame);
 
 async function runGame() {
 	const playerFace = faceInput.value;
-	connectForm.remove();
 	
 	if (playerFace.length !== 5) {
 		alert('Face must be 5 characters long!');
 		return;
 	}
 	
+	faceInput.disabled = true;
+	connectButton.disabled = true;
+	
 	const socket = new Socket(wsConnectUrl);
-	window.socket = socket;
 	
 	await socket.send(playerFace);
+	const connectionResult = await socket.recv();
+	
+	let failureMessage;
+	switch (connectionResult.data) {
+	case 'success':
+		failureMessage = null;
+		break;
+	case 'in_use':
+		failureMessage = 'That face is already in use. Please select a different one.';
+		break;
+	case 'invalid_world':
+		failureMessage = 'That, uh, world is invalid? This really shouldn\'t be showing up.';
+		break;
+	default:
+		failureMessage = `Unknown error occurred while joining: ${connectionResult.data}`;
+	}
+	
+	if (failureMessage) {
+		alert(failureMessage);
+		faceInput.disabled = false;
+		connectButton.disabled = false;
+	} else {
+		connectForm.remove();
+	}
 	
 	const entityTypes = new EntityTypeRegistry(playerFace)
 		.register(Ant)

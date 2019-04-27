@@ -39,15 +39,19 @@ class ChatterUniverse:
 	@asynccontextmanager
 	async def add_client(self, client, world=None):
 		if client.face in self.clients:
+			await client.send('in_use')
 			raise KeyError(f'{client.face} is already in use')
 		
 		world = world or self.default
 		
 		if self.worlds.get(world.id) != world:
+			await client.send('invalid_world')
 			raise ValueError('Asked to join unknown world')
 		
 		self.clients[client.face] = client
 		world.add_client(client)
+		
+		await client.send('success')
 		
 		try:
 			yield client
