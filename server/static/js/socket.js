@@ -15,12 +15,12 @@ export default class Socket {
 		this._recvQueue = [];
 		
 		this._ws.onopen = () => {
-			for (let {resolve} of this._onOpen) {
+			for (const {resolve} of this._onOpen) {
 				resolve();
 			}
 			this._onOpen = [];
 			
-			for (let {data, resolve, reject} of this._sendQueue) {
+			for (const {data, resolve, reject} of this._sendQueue) {
 				try {
 					resolve(this._ws.send(data));
 				} catch (e) {
@@ -48,12 +48,12 @@ export default class Socket {
 			console.error(err);
 			
 			if (this._ws.readyState >= CLOSING) {
-				for (let {reject} of this._onOpen) {
+				for (const {reject} of this._onOpen) {
 					reject(err);
 				}
 				this._onOpen = [];
 				
-				for (let {reject} of this._onMess) {
+				for (const {reject} of this._onMess) {
 					reject(err);
 				}
 				this._onMess = [];
@@ -66,6 +66,16 @@ export default class Socket {
 			} else {
 				console.error('Closed', e.code, e.reason);
 			}
+			
+			for (const {reject} of this._onOpen) {
+				reject(e);
+			}
+			this._onOpen = [];
+			
+			for (const {reject} of this._onMess) {
+				reject(e);
+			}
+			this._onMess = [];
 		}
 	}
 	
