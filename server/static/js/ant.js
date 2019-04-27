@@ -302,6 +302,8 @@ export default class Ant extends Entity {
 				}
 			}
 		}
+		
+		this.transits = [];
 	}
 	
 	ensureGutInfo(char) {
