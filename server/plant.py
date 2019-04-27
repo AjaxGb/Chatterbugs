@@ -49,14 +49,13 @@ class Word(EntityBase):
     def kill(self):
         self.alive = False
         if self.parent_plant != None:
+            self.parent_plant.words.remove(self)
             self.parent_plant = None
         for b in self.branches:
             b.kill()
     
     def on_removed(self):
         super().on_removed()
-        if(self.parent_plant != None):
-            self.parent_plant.words.remove(self)
         if(self.parent_branch != None):
             self.parent_branch.branches.remove(self)
         self.kill()
@@ -74,11 +73,11 @@ class Word(EntityBase):
             # This should be tree-only code.
             new_angle = 0
             if len(self.branches) == 1:
-                new_angle = super().rot + (super().rot - self.branches[0].rot)*7*random.random()
+                new_angle = super().rot + (super().rot - self.branches[0].rot)*0.3*random.random()
             else:
-                new_angle = super().rot + (random.random()-0.5)*0.8
+                new_angle = super().rot + (random.random()-0.5)*1.2
             if abs(new_angle - self.parent_plant.rot - math.pi/2) > math.pi/3:
-                new_angle = (new_angle*2+self.parent_plant.rot-math.pi/2)/3
+                new_angle = (new_angle+self.parent_plant.rot-math.pi/2)/2
             
             good = True
             for b in self.branches:

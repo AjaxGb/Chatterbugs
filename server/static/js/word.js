@@ -31,7 +31,6 @@ export default class Word extends Entity {
 			ctx2.textBaseline = 'top';
 			ctx2.fillText(this.text, 0, 0);
 		}
-		ctx.fillRect(...this.pos, 1, 1);
 		ctx.save();
 		ctx.translate(...this.pos);
 		ctx.rotate(this.rot);
